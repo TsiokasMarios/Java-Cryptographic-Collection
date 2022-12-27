@@ -37,10 +37,13 @@ public class SymmetricEnc {
     }
 
     public static void main(String[] args){
-        String toEncrypt = "Wah";
+        String toEncrypt = "";
         byte[] encrypted;
         byte[] decrypted;
         try {
+
+            toEncrypt = Utils.extractMessage("toencrypt.txt");
+
             SecretKey key = getSecretEncryptionKey();
             encrypted = encryptText(toEncrypt,key);
             decrypted = decryptText(encrypted,key);
@@ -52,39 +55,6 @@ public class SymmetricEnc {
         catch (Exception e){
             e.printStackTrace();
         }
-
-
-
-//        try {
-//            SecretKey AESKey = SymmetricEnc.createAESKey();
-//            StringBuffer hexKey = new StringBuffer();
-//
-//            System.out.println(hexKey);
-//
-//            Cipher AESCipher = Cipher.getInstance(AES);
-//            AESCipher.init(Cipher.ENCRYPT_MODE,AESKey);
-//
-//            byte[] coded;
-//
-//            coded = AESCipher.doFinal(toCode.getBytes());
-//
-//            System.out.println(coded);
-//
-//            AESCipher = Cipher.getInstance(AES);
-//            AESCipher.init(Cipher.DECRYPT_MODE,AESKey);
-//
-//            byte[] result = AESCipher.doFinal(coded);
-//            StringBuffer hexCipher = new StringBuffer();
-//            for (int i = 0; i < result.length; i++) {
-//                hexCipher.append(Integer.toHexString(0xff & result[i]));
-//            }
-//            System.out.println(hexCipher);
-//
-//
-//
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
 
     }
 }
