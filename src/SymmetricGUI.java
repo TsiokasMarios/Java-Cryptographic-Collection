@@ -1,3 +1,4 @@
+import javax.crypto.SecretKey;
 import javax.swing.*;
 import java.awt.*;
 import java.util.EventListener;
@@ -17,11 +18,22 @@ public class SymmetricGUI extends JPanel implements EventListener {
         c.gridy = 0;
         this.add(genKey, c);
 
+
         JLabel secretKey = new JLabel("Secret key here");
         c.gridx = 1;
         c.gridy = 0;
         c.insets = new Insets(0,20,0,20);
         this.add(secretKey, c);
+
+            genKey.addActionListener(e -> {
+                try {
+                    SecretKey secKey = SymmetricEnc.getSecretEncryptionKey();
+//                    secretKey.setText(SymmetricEnc.);
+
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
 
         JButton bt3 = new JButton("save");
         c.gridx = 2;

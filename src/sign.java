@@ -6,11 +6,12 @@ import javax.crypto.SecretKey;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.io.StringWriter;
+import java.io.*;
 import java.security.*;
 
 public class sign {
+
+
     public static void main(String[] args)  throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException {
         String msg = "Wah";
         String wrong = "Nah";
@@ -23,12 +24,21 @@ public class sign {
         PublicKey pub = keyPair.getPublic();
         PrivateKey priv = keyPair.getPrivate();
 
-        StringWriter write = new StringWriter();
-        PemWriter pemWriter = new PemWriter(write);
-        pemWriter.writeObject(new PemObject("PUBLIC KEY",pub.getEncoded()));
-        pemWriter.flush();
+//        StringWriter write = new StringWriter();
+//        PemWriter pemWriter = new PemWriter(write);
+//        pemWriter.writeObject(new PemObject("PUBLIC KEY",pub.getEncoded()));
+
+        PemObject pemObject = new PemObject("PUBLIC KEY",pub.getEncoded());
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        PemWriter pemWriter = new PemWriter(new OutputStreamWriter(byteArrayOutputStream));
+        pemWriter.writeObject(pemObject);
         pemWriter.close();
-        System.out.println(write.toString());
+        FileWriter mywriter = new FileWriter("key.pem");
+        mywriter.write(byteArrayOutputStream.toString());
+        mywriter.close();
+        System.out.println(byteArrayOutputStream.toString());
+
 
 
         //Create signature
@@ -48,7 +58,7 @@ public class sign {
         }
         else
             System.out.println("nah son");
-        new myFrame();
+//        new myFrame();
     }
 
 }

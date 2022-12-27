@@ -15,7 +15,6 @@ public class SymmetricEnc {
         generator.init(256,secureRandom); // The AES key size in number of bits
 
         return generator.generateKey();
-
     }
 
     public static byte[] encryptText(String plainText,SecretKey secKey) throws Exception{
@@ -37,24 +36,6 @@ public class SymmetricEnc {
         return aesCipher.doFinal(byteCipherText);
     }
 
-    public static void printSecretKeyHex(SecretKey key){
-        StringBuilder hexKey = new StringBuilder();
-        for (int i=0; i < key.getEncoded().length; i++){
-               hexKey.append(Integer.toHexString(0xff & key.getEncoded()[i]));
-        }
-        System.out.println("Secret key: " + hexKey);
-
-    }
-
-    public static void printEncryptedText(byte[] text){
-        StringBuilder msg = new StringBuilder();
-        for (byte b : text) {
-            msg.append(Integer.toHexString(0xff & b));
-        }
-        System.out.println("Encrypted text: " + msg);
-    }
-
-
     public static void main(String[] args){
         String toEncrypt = "Wah";
         byte[] encrypted;
@@ -63,9 +44,8 @@ public class SymmetricEnc {
             SecretKey key = getSecretEncryptionKey();
             encrypted = encryptText(toEncrypt,key);
             decrypted = decryptText(encrypted,key);
-            printEncryptedText(encrypted);
-            printSecretKeyHex(key);
-            printEncryptedText(decrypted);
+            System.out.println("Encrypted text: " + Utils.convertToHex(encrypted));
+            System.out.println("Secret key: " + Utils.convertToHex(key.getEncoded()));
             System.out.println("Decrypted message: " + new String(decrypted));
 
         }

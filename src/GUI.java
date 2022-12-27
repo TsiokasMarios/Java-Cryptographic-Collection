@@ -69,8 +69,10 @@ public class GUI extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == goToSymmetric)
-            cardLayout.show(container,"symmetric");
+        if (e.getSource() == goToSymmetric) {
+            this.setTitle("Symmetric encryption");
+            cardLayout.show(container, "symmetric");
+        }
         else if (e.getSource() == goToAsymmetric) {
             cardLayout.show(container,"asymmetric");
         }

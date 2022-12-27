@@ -31,14 +31,7 @@ public class AssymetricEnc {
 
         byte[] decrypted = decrypt(keyPair.getPublic(),encrypted);
 
+        System.out.println(new String(decrypted));
 
-    }
-
-    public static void printEncryptedText(byte[] text){
-        StringBuilder msg = new StringBuilder();
-        for (byte b : text) {
-            msg.append(Integer.toHexString(0xff & b));
-        }
-        System.out.println("Encrypted text: " + msg);
     }
 }
