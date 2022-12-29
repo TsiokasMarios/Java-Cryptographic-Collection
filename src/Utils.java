@@ -1,35 +1,26 @@
 import java.io.*;
-import java.util.Scanner;
 
 public class Utils {
-    public static StringBuilder convertToHex(byte[] text){
+    public static String convertToHex(byte[] text){
         StringBuilder msg = new StringBuilder();
         for (byte b : text) {
             msg.append(Integer.toHexString(0xff & b));
         }
-        return msg;
+        return msg.toString();
     }
 
-    public Utils(String name, boolean append) throws FileNotFoundException{
+    public static void saveEncryptedText(String name,String text) throws FileNotFoundException{
         try
         {
-            Scanner sc=new Scanner(System.in);         //object of Scanner class
-            System.out.print("Enter the file name: ");
-            name = sc.nextLine();
-            FileOutputStream fos=new FileOutputStream(name, true);  // true for append mode
-            System.out.print("Enter file content: ");
-            String str=sc.nextLine()+"\n";      //str stores the string which we have entered
-            byte[] b= str.getBytes();       //converts string into bytes
-            fos.write(b);           //writes bytes into file
-            fos.close();            //close the file
-            System.out.println("file saved.");
+            FileWriter myWriter = new FileWriter(name+".txt");
+            myWriter.write(text);
+            myWriter.close();
         }
         catch(Exception e)
         {
             e.printStackTrace();
         }
     }
-
 
     public static String extractMessage(String filePath){
         StringBuilder message = new StringBuilder();
@@ -38,12 +29,25 @@ public class Utils {
             String line;
             while ((line = br.readLine()) != null) {
                 // extract the message
-                message.append(line).append("\n");
+                message.append(line);
             }
             br.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println("message " + message);
         return message.toString();
+    }
+
+    public static byte[] stringToBytes(String string){
+        char[] chars = string.toCharArray();
+
+        byte[] bytes = new byte[chars.length];
+
+        for (int i =0; i < chars.length; i++){
+            bytes[i] = (byte) chars[i];
+        }
+        return bytes;
+
     }
 }
