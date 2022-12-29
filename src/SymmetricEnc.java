@@ -1,9 +1,7 @@
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 
@@ -30,6 +28,18 @@ public class SymmetricEnc {
         javaKeyStore.setKeyEntry("AliasForKey",keyToStore,password.toCharArray(),null);
         OutputStream writeStream = new FileOutputStream(filepath);
         javaKeyStore.store(writeStream, password.toCharArray());
+    }
+
+    public static SecretKey RetrieveFromKeyStore(String filepath,String password){
+        try{
+            KeyStore keyStore = KeyStore.getInstance("JCEKS");
+            InputStream readStream = new FileInputStream(filepath);
+            keyStore.load(readStream,password.toCharArray());
+        }
+        catch (Exception e){
+            System.out.println(e);
+        }
+        return null;
     }
 
     public static byte[] encryptText(String plainText,SecretKey secKey) throws Exception{
