@@ -1,6 +1,5 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.util.Scanner;
 
 public class Utils {
     public static StringBuilder convertToHex(byte[] text){
@@ -10,6 +9,27 @@ public class Utils {
         }
         return msg;
     }
+
+    public Utils(String name, boolean append) throws FileNotFoundException{
+        try
+        {
+            Scanner sc=new Scanner(System.in);         //object of Scanner class
+            System.out.print("Enter the file name: ");
+            name = sc.nextLine();
+            FileOutputStream fos=new FileOutputStream(name, true);  // true for append mode
+            System.out.print("Enter file content: ");
+            String str=sc.nextLine()+"\n";      //str stores the string which we have entered
+            byte[] b= str.getBytes();       //converts string into bytes
+            fos.write(b);           //writes bytes into file
+            fos.close();            //close the file
+            System.out.println("file saved.");
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
 
     public static String extractMessage(String filePath){
         StringBuilder message = new StringBuilder();
