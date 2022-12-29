@@ -1,12 +1,20 @@
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import javax.swing.*;
 import java.awt.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.EventListener;
 
 public class SymmetricGUI extends JPanel implements EventListener {
     JButton button;
+    SecretKey secKey;
+    Charset charset = StandardCharsets.US_ASCII;
+    byte[] encrypted;
+    byte[] decrypted;
 
-        SymmetricGUI() {
+    SymmetricGUI() {
         GridBagConstraints c = new GridBagConstraints();
         this.setLayout(new GridBagLayout());
 //        this.setBackground(Color.RED);
@@ -19,26 +27,32 @@ public class SymmetricGUI extends JPanel implements EventListener {
         this.add(genKey, c);
 
 
-        JLabel secretKey = new JLabel("Secret key here");
+        JTextField secretKey = new JTextField("Secret key here");
         c.gridx = 1;
         c.gridy = 0;
-        c.insets = new Insets(0,20,0,20);
+        c.insets = new Insets(0, 20, 0, 20);
         this.add(secretKey, c);
 
-            genKey.addActionListener(e -> {
-                try {
-                    SecretKey secKey = SymmetricEnc.getSecretEncryptionKey();
-//                    secretKey.setText(SymmetricEnc.);
+        //Simulate the look and feel of a jlabel so we can select the text
+        secretKey.setEditable(false);
+        secretKey.setBorder(null);
+        secretKey.setForeground(UIManager.getColor("Label.foreground"));
+        secretKey.setFont(UIManager.getFont("Label.font"));
 
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
-            });
+        genKey.addActionListener(e -> {
+            try {
+                secKey = SymmetricEnc.getSecretEncryptionKey();
+                secretKey.setText(Utils.keyToHex(secKey));
+
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        });
 
         JButton bt3 = new JButton("save");
         c.gridx = 2;
         c.gridy = 0;
-        this.add(bt3,c);
+        this.add(bt3, c);
 
         JSeparator separator = new JSeparator();
 
@@ -46,88 +60,122 @@ public class SymmetricGUI extends JPanel implements EventListener {
         c.gridx = 0;
         c.gridy = 1;
         c.fill = GridBagConstraints.HORIZONTAL;
-        this.add(separator,c);
+        this.add(separator, c);
 
         JLabel encrypt = new JLabel("Encrypt");
         c.gridwidth = 3;
         c.gridx = 1;
         c.gridy = 2;
         c.fill = GridBagConstraints.HORIZONTAL;
-        this.add(encrypt,c);
+        this.add(encrypt, c);
 
         JLabel enterClearText = new JLabel("Enter message to encrypt");
         c.gridwidth = 1;
         c.gridx = 0;
         c.gridy = 3;
-        this.add(enterClearText,c);
+        this.add(enterClearText, c);
 
         JTextField plainText = new JTextField();
-        c.gridwidth = 2;
+        c.gridwidth = 1;
         c.fill = GridBagConstraints.HORIZONTAL;
         c.gridx = 1;
         c.gridy = 3;
-        this.add(plainText,c);
+        this.add(plainText, c);
 
-        JLabel encodedText = new JLabel("Encoded text:");
+        JButton encryptButton = new JButton("Encrypt");
+        c.gridx =2;
+        c.gridy = 3;
+        this.add(encryptButton,c);
+
+
+        JLabel encodedTextLabel = new JLabel("Encoded text:");
         c.gridwidth = 1;
         c.gridx = 0;
         c.gridy = 4;
-        this.add(encodedText,c);
+        this.add(encodedTextLabel, c);
 
-        JLabel encoded = new JLabel("WAKBFKDA;bngsbhieurbgailvberg");
+
+        JTextField encoded = new JTextField ("WAKBFKDA;bngsbhieurbgailvberg");
+        encoded.setEditable(false);
+        encoded.setBorder(null);
+        encoded.setForeground(UIManager.getColor("Label.foreground"));
+        encoded.setFont(UIManager.getFont("Label.font"));
         c.gridx = 1;
         c.gridy = 4;
-        this.add(encoded,c);
+        this.add(encoded, c);
+
+        encryptButton.addActionListener(e -> {
+
+            try {
+                encrypted = SymmetricEnc.encryptText(plainText.getText(),secKey);
+                encoded.setText(Utils.convertToHex(encrypted).toString());
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        });
 
         JButton saveEncrypted = new JButton("Save");
         c.gridx = 2;
         c.gridy = 4;
-        this.add(saveEncrypted,c);
+        this.add(saveEncrypted, c);
 
         JSeparator separator1 = new JSeparator();
         c.gridx = 0;
         c.gridy = 5;
         c.gridwidth = 3;
         c.fill = GridBagConstraints.HORIZONTAL;
-        this.add(separator1,c);
+        this.add(separator1, c);
 
         JLabel decryptLB = new JLabel("Decrypt");
         c.gridwidth = 1;
         c.gridx = 1;
         c.gridy = 6;
-        this.add(decryptLB,c);
+        this.add(decryptLB, c);
 
         JLabel encryptedText = new JLabel("Enter text to decrypt");
         c.gridx = 0;
         c.gridy = 7;
-        this.add(encryptedText,c);
+        this.add(encryptedText, c);
 
         JTextField textToDecrypt = new JTextField();
         c.gridx = 1;
         c.gridy = 7;
-        this.add(textToDecrypt,c);
+        this.add(textToDecrypt, c);
 
         JLabel secretKeyLB = new JLabel("Enter secret key");
         c.gridx = 0;
         c.gridy = 8;
-        this.add(secretKeyLB,c);
+        this.add(secretKeyLB, c);
 
         JTextField enterKey = new JTextField();
         c.gridx = 1;
         c.gridy = 8;
-        this.add(enterKey,c);
+        this.add(enterKey, c);
 
         JButton decrypt = new JButton("Decrypt");
         c.gridx = 2;
         c.gridy = 8;
-        this.add(decrypt,c);
+        this.add(decrypt, c);
 
         JLabel decodedmsg = new JLabel("Decoded msg here");
         c.gridx = 1;
         c.gridy = 9;
         c.gridwidth = 3;
         c.fill = GridBagConstraints.HORIZONTAL;
-        this.add(decodedmsg,c);
+        this.add(decodedmsg, c);
+
+        decrypt.addActionListener(e -> {
+            byte[] bar = charset.encode(encryptedText.getText()).array();
+            try {
+                byte[] decodedKey = Base64.getDecoder().decode(enterKey.getText());
+                // rebuild key using SecretKeySpec
+                SecretKey originalKey = SymmetricEnc.stringtokey(enterKey.getText());
+                decrypted = SymmetricEnc.decryptText(bar,originalKey);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+            decodedmsg.setText(new String(decrypted));
+        });
 
     }
 //    SymmetricGUI() {

@@ -1,4 +1,9 @@
 import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.security.Key;
+
 
 public class Utils {
     public static String convertToHex(byte[] text){
@@ -49,5 +54,11 @@ public class Utils {
         }
         return bytes;
 
+
+    public static String keyToHex(Key secretKey){
+        StringBuffer hexKey = new StringBuffer();
+        for (int i=0;i<secretKey.getEncoded().length;i++)
+            hexKey.append(Integer.toHexString(0xFF & secretKey.getEncoded()[i]));
+        return hexKey.toString();
     }
 }

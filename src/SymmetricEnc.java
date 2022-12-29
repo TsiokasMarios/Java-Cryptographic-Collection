@@ -5,12 +5,17 @@ import java.io.*;
 import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.Charset;
+import java.security.Key;
+
 import java.security.SecureRandom;
 import java.util.Base64;
 
 
 public class SymmetricEnc {
     private static final String AES = "AES";
+
 
     public static SecretKey getSecretEncryptionKey() throws Exception{
 
@@ -19,6 +24,7 @@ public class SymmetricEnc {
 
         generator.init(256,secureRandom); // The AES key size in number of bits
 
+        System.out.println(generator.generateKey().getEncoded().length);
         return generator.generateKey();
     }
 
@@ -67,12 +73,24 @@ public class SymmetricEnc {
         return new String(cipherText);
     }
 
+    public static SecretKey stringtokey(String keyString){
+        Key key;
+        try {
+            key = new SecretKeySpec(keyString.getBytes(), 0, keyString.getBytes().length, "AES");
+            return (SecretKey)key;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public static void main(String[] args){
         String wah = "wah";
         String toEncrypt;
         String toDecrypt;
         String encrypted;
         String decrypted;
+
         try {
 
 
@@ -122,6 +140,7 @@ public class SymmetricEnc {
 //            System.out.println("w22 length " + w22.length);
 
             decrypted = decryptText(encrypted,key);
+
             System.out.println("Decrypted message 1: " + decrypted);
             String decrypted2 = decryptText(w3, key2);
             System.out.println("Decrypted message 2: " + decrypted2);
@@ -133,6 +152,7 @@ public class SymmetricEnc {
 //            System.out.println("Secret key1: " + Utils.convertToHex(key.getEncoded()));
 //            System.out.println("Secret key2: " + Utils.convertToHex(key2.getEncoded()));
 //            System.out.println("Decrypted message: " + new String(decrypted));
+
 
 
 
