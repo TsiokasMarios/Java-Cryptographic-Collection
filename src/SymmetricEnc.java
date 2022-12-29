@@ -23,7 +23,7 @@ public class SymmetricEnc {
 
     public static void StoreKey(SecretKey keyToStore, String password, String filepath) throws Exception{
         File file = new File(filepath);
-        KeyStore javaKeyStore = KeyStore.getInstance("KEKW");
+        KeyStore javaKeyStore = KeyStore.getInstance("JCEKS");
         if(!file.exists()){
             javaKeyStore.load(null,null);
         }
