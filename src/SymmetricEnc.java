@@ -1,6 +1,10 @@
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.security.KeyStore;
 import java.security.SecureRandom;
 
 
@@ -15,6 +19,17 @@ public class SymmetricEnc {
         generator.init(256,secureRandom); // The AES key size in number of bits
 
         return generator.generateKey();
+    }
+
+    public static void StoreKey(SecretKey keyToStore, String password, String filepath) throws Exception{
+        File file = new File(filepath);
+        KeyStore javaKeyStore = KeyStore.getInstance("KEKW");
+        if(!file.exists()){
+            javaKeyStore.load(null,null);
+        }
+        javaKeyStore.setKeyEntry("AliasForKey",keyToStore,password.toCharArray(),null);
+        OutputStream writeStream = new FileOutputStream(filepath);
+        javaKeyStore.store(writeStream, password.toCharArray());
     }
 
     public static byte[] encryptText(String plainText,SecretKey secKey) throws Exception{
