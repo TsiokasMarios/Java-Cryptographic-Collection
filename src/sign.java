@@ -28,6 +28,7 @@ public class sign {
 //        PemWriter pemWriter = new PemWriter(write);
 //        pemWriter.writeObject(new PemObject("PUBLIC KEY",pub.getEncoded()));
 
+        //Save public key in pem file
         PemObject pemObject = new PemObject("PUBLIC KEY",pub.getEncoded());
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -38,7 +39,7 @@ public class sign {
         mywriter.write(byteArrayOutputStream.toString());
         mywriter.close();
         System.out.println(byteArrayOutputStream.toString());
-
+        //
 
 
         //Create signature
@@ -58,7 +59,7 @@ public class sign {
         }
         else
             System.out.println("nah son");
-//        new myFrame();
+        new myFrame();
     }
 
 }
