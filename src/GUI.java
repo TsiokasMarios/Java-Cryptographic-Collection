@@ -53,7 +53,7 @@ public class GUI extends JFrame implements ActionListener {
         asymmetric.setBackground(Color.GREEN);
         //***************************************************//
 
-        setSize(600,800);
+        setSize(900,800);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         container.add(menu,"menu");

@@ -41,21 +41,21 @@ public class SymmetricEnc {
         return encodedKey;
     }
 
-    public static void storeKey(SecretKey keyToStore, String password, String filepath,String name) throws Exception{
-        File file = new File(filepath);
+    public static void storeKey(SecretKey keyToStore, String password, String name,String keystoreName) throws Exception{
+        File file = new File(keystoreName+".keystore");
         KeyStore javaKeyStore = KeyStore.getInstance("JCEKS");
         if(!file.exists()){
             javaKeyStore.load(null,null);
         }
         javaKeyStore.setKeyEntry(name,keyToStore,password.toCharArray(),null);
-        OutputStream writeStream = new FileOutputStream(filepath);
+        OutputStream writeStream = new FileOutputStream(keystoreName+".keystore");
         javaKeyStore.store(writeStream, password.toCharArray());
     }
 
-    public static SecretKey retrieveFromKeyStore(String filepath,String password,String name){
+    public static SecretKey retrieveFromKeyStore(String password,String name){
         try{
             KeyStore keyStore = KeyStore.getInstance("JCEKS");
-            InputStream readStream = new FileInputStream(filepath);
+            InputStream readStream = new FileInputStream(name+".keystore");
             keyStore.load(readStream,password.toCharArray());
             return (SecretKey) keyStore.getKey(name,password.toCharArray());
         }
@@ -121,7 +121,7 @@ public class SymmetricEnc {
 
             SecretKey key = getSecretEncryptionKey();
             //Store key in keystore
-//            storeKey(key,"1234","keystore.keystore","key1");
+            storeKey(key,"1234","keystore.keystore","key1");
 
             //Retrieve message to encrypt
 
@@ -131,7 +131,7 @@ public class SymmetricEnc {
             //Save encrypted text
             Utils.saveEncryptedText("text1",encrypted);
 
-            SecretKey key2 = retrieveFromKeyStore("keystore.keystore","1234","key1");
+//            SecretKey key2 = retrieveFromKeyStore("keystore.keystore","1234","key1");
             String w3 = Utils.extractMessage("text1.txt");
             //Decrypt message with generated key
             byte[] ar = Utils.stringToBytes(w3);
