@@ -172,9 +172,9 @@ public class SymmetricGUI extends JPanel implements EventListener {
                 SecretKey originalKey = SymmetricEnc.stringToAESKey(enterKey.getText());
                 System.out.println(encryptedText.getText());
                 String t = Base64.getEncoder().encodeToString(encryptedText.getText().getBytes());
-                System.out.println(t);
-                System.out.println(encryptedText.getText());
-                decrypted = SymmetricEnc.decryptText(encryptedText.getText(),secKey);
+                System.out.println("encoded text "+ t);
+                System.out.println("text from field entered by user " + encryptedText.getText());
+                decrypted = SymmetricEnc.decryptText(encoded.getText(),originalKey);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
