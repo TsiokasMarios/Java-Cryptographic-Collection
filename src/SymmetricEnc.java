@@ -28,6 +28,19 @@ public class SymmetricEnc {
         return generator.generateKey();
     }
 
+    public static String keyToString(SecretKey secretKey) {
+        /* Get key in encoding format */
+        byte encoded[] = secretKey.getEncoded();
+
+        /*
+         * Encodes the specified byte array into a String using Base64 encoding
+         * scheme
+         */
+        String encodedKey = Base64.getEncoder().encodeToString(encoded);
+
+        return encodedKey;
+    }
+
     public static void storeKey(SecretKey keyToStore, String password, String filepath,String name) throws Exception{
         File file = new File(filepath);
         KeyStore javaKeyStore = KeyStore.getInstance("JCEKS");
@@ -73,10 +86,11 @@ public class SymmetricEnc {
         return new String(cipherText);
     }
 
-    public static SecretKey stringtokey(String keyString){
+    public static SecretKey stringToAESKey(String keyString){
         Key key;
         try {
-            key = new SecretKeySpec(keyString.getBytes(), 0, keyString.getBytes().length, "AES");
+            byte[] encodedKey = Base64.getDecoder().decode(keyString);
+            key = new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES");
             return (SecretKey)key;
         } catch (Exception e) {
             e.printStackTrace();
@@ -93,9 +107,6 @@ public class SymmetricEnc {
 
         try {
 
-
-
-
 //            SecretKey key = getSecretEncryptionKey();
 //            encrypted = encryptText(toEncrypt,key);
 //            decrypted = decryptText(encrypted,key);
@@ -110,7 +121,7 @@ public class SymmetricEnc {
 
             SecretKey key = getSecretEncryptionKey();
             //Store key in keystore
-            storeKey(key,"1234","keystore.keystore","key1");
+//            storeKey(key,"1234","keystore.keystore","key1");
 
             //Retrieve message to encrypt
 
@@ -141,20 +152,30 @@ public class SymmetricEnc {
 
             decrypted = decryptText(encrypted,key);
 
+//            SecretKey key3 = stringtokey(Utils.convertToHex(key.getEncoded()));
+            String keyString = keyToString(key);
+            System.out.println("Key to string " + keyString);
+
+            SecretKey key3 = stringToAESKey(keyString);
+
+
+
+//            byte[] decodedKey = Base64.getDecoder().decode(keyToString(key));
+//            SecretKey key3 = new SecretKeySpec(decodedKey,0,decodedKey.length,"AES");
+
+            System.out.println("key3 " + Utils.convertToHex(key3.getEncoded())); //readable format
+
             System.out.println("Decrypted message 1: " + decrypted);
-            String decrypted2 = decryptText(w3, key2);
+            String decrypted2 = decryptText(w3, key3);
             System.out.println("Decrypted message 2: " + decrypted2);
 //            decrypted = decryptText(w33,key);
 
 
             //Print stuff
 //            System.out.println("Encrypted text: " + Utils.convertToHex(encrypted));
-//            System.out.println("Secret key1: " + Utils.convertToHex(key.getEncoded()));
+            System.out.println("Secret key1: " + Utils.convertToHex(key.getEncoded()));
 //            System.out.println("Secret key2: " + Utils.convertToHex(key2.getEncoded()));
 //            System.out.println("Decrypted message: " + new String(decrypted));
-
-
-
 
         }
         catch (Exception e){

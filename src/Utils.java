@@ -44,15 +44,16 @@ public class Utils {
         return message.toString();
     }
 
-    public static byte[] stringToBytes(String string){
+    public static byte[] stringToBytes(String string) {
         char[] chars = string.toCharArray();
 
         byte[] bytes = new byte[chars.length];
 
-        for (int i =0; i < chars.length; i++){
+        for (int i = 0; i < chars.length; i++) {
             bytes[i] = (byte) chars[i];
         }
         return bytes;
+    }
 
 
     public static String keyToHex(Key secretKey){
@@ -62,3 +63,4 @@ public class Utils {
         return hexKey.toString();
     }
 }
+

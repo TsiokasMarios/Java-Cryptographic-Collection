@@ -1,3 +1,5 @@
+import org.bouncycastle.asn1.ASN1Absent;
+
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.swing.*;
@@ -11,8 +13,8 @@ public class SymmetricGUI extends JPanel implements EventListener {
     JButton button;
     SecretKey secKey;
     Charset charset = StandardCharsets.US_ASCII;
-    byte[] encrypted;
-    byte[] decrypted;
+    String encrypted;
+    String decrypted;
 
     SymmetricGUI() {
         GridBagConstraints c = new GridBagConstraints();
@@ -42,7 +44,7 @@ public class SymmetricGUI extends JPanel implements EventListener {
         genKey.addActionListener(e -> {
             try {
                 secKey = SymmetricEnc.getSecretEncryptionKey();
-                secretKey.setText(Utils.keyToHex(secKey));
+                secretKey.setText(SymmetricEnc.keyToString(secKey));
 
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
@@ -108,7 +110,7 @@ public class SymmetricGUI extends JPanel implements EventListener {
 
             try {
                 encrypted = SymmetricEnc.encryptText(plainText.getText(),secKey);
-                encoded.setText(Utils.convertToHex(encrypted).toString());
+                encoded.setText(encrypted);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
@@ -165,16 +167,18 @@ public class SymmetricGUI extends JPanel implements EventListener {
         this.add(decodedmsg, c);
 
         decrypt.addActionListener(e -> {
-            byte[] bar = charset.encode(encryptedText.getText()).array();
             try {
-                byte[] decodedKey = Base64.getDecoder().decode(enterKey.getText());
                 // rebuild key using SecretKeySpec
-                SecretKey originalKey = SymmetricEnc.stringtokey(enterKey.getText());
-                decrypted = SymmetricEnc.decryptText(bar,originalKey);
+                SecretKey originalKey = SymmetricEnc.stringToAESKey(enterKey.getText());
+                System.out.println(encryptedText.getText());
+                String t = Base64.getEncoder().encodeToString(encryptedText.getText().getBytes());
+                System.out.println(t);
+                System.out.println(encryptedText.getText());
+                decrypted = SymmetricEnc.decryptText(encryptedText.getText(),secKey);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
-            decodedmsg.setText(new String(decrypted));
+            decodedmsg.setText(decrypted);
         });
 
     }
