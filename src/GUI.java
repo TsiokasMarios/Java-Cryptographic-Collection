@@ -9,7 +9,7 @@ public class GUI extends JFrame implements ActionListener {
     public static JPanel container = new JPanel();
     JPanel menu = new JPanel();
     JPanel symmetric = new SymmetricGUI();
-    JPanel asymmetric = new JPanel();
+    JPanel asymmetric = new AsymmetricGUI();
     JPanel sign = new JPanel();
 
     JButton goToSymmetric = new JButton();
@@ -48,9 +48,9 @@ public class GUI extends JFrame implements ActionListener {
 //        symmetric.setBackground(Color.RED);
         //***************************************************//
         //Asymmetric "page"
-        asymmetric.setLayout(new BoxLayout(asymmetric, BoxLayout.PAGE_AXIS));
+//        asymmetric.setLayout(new BoxLayout(asymmetric, BoxLayout.PAGE_AXIS));
 //        asymmetric.add(bt3);
-        asymmetric.setBackground(Color.GREEN);
+//        asymmetric.setBackground(Color.GREEN);
         //***************************************************//
 
         setSize(900,800);
@@ -59,7 +59,7 @@ public class GUI extends JFrame implements ActionListener {
         container.add(menu,"menu");
         container.add(symmetric,"symmetric");
         container.add(asymmetric,"asymmetric");
-        cardLayout.show(container,"symmetric");
+        cardLayout.show(container,"asymmetric");
     }
     public static void main(String[] args) {
         GUI c = new GUI();

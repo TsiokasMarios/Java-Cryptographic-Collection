@@ -29,16 +29,6 @@ public class sign {
 //        pemWriter.writeObject(new PemObject("PUBLIC KEY",pub.getEncoded()));
 
         //Save public key in pem file
-        PemObject pemObject = new PemObject("PUBLIC KEY",pub.getEncoded());
-
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        PemWriter pemWriter = new PemWriter(new OutputStreamWriter(byteArrayOutputStream));
-        pemWriter.writeObject(pemObject);
-        pemWriter.close();
-        FileWriter mywriter = new FileWriter("key.pem");
-        mywriter.write(byteArrayOutputStream.toString());
-        mywriter.close();
-        System.out.println(byteArrayOutputStream.toString());
         //
 
 

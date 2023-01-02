@@ -1,188 +1,132 @@
-import org.bouncycastle.asn1.ASN1Absent;
-
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.EventListener;
 
 public class SymmetricGUI extends JPanel implements EventListener {
-    JButton button;
     SecretKey secKey;
-    Charset charset = StandardCharsets.US_ASCII;
     String encrypted;
     String decrypted;
     Boolean loadedFromStore = false;
 
+    JButton generateKeyButton;
+    JButton loadKeyButton;
+    JButton saveKeyButton;
+    JTextArea messageToEncrypt;
+    JTextArea secretKeyField;
+    JButton encryptButton;
+    JButton loadMessageToEncryptButton;
+    JButton saveMessageButton;
+    JLabel jcomp9;
+    JTextArea jcomp10;
+    JTextArea encryptedMessage;
+    JButton decryptButton;
+    JButton loadKeyToDecryptButton;
+    JButton loadTextToDecryptButton;
+    JTextField loadedKey;
+    JTextField decryptedText;
+    JTextField loadedTextToDecrypt;
     SymmetricGUI() {
-        GridBagConstraints c = new GridBagConstraints();
-        this.setLayout(new GridBagLayout());
-//        this.setBackground(Color.RED);
 
-        JButton genKey = new JButton("Generate secret key");
-        c.anchor = GridBagConstraints.FIRST_LINE_START;
-        c.weighty = 0.1;
-        c.gridx = 0;
-        c.gridy = 0;
-        this.add(genKey, c);
+        //construct components
+        generateKeyButton = new JButton("Generate key");
+        loadKeyButton = new JButton("Load key");
+        saveKeyButton = new JButton("Save key");
+        messageToEncrypt = new JTextArea();
+        secretKeyField = new JTextArea();
+        encryptButton = new JButton("Encrypt");
+        loadMessageToEncryptButton = new JButton("Load message");
+        saveMessageButton = new JButton("Save message");
+        jcomp9 = new JLabel("Enter text or load from text file");
+        jcomp10 = new JTextArea(5, 5);
+        encryptedMessage = new JTextArea();
+        decryptButton = new JButton("Decrypt");
+        loadKeyToDecryptButton = new JButton("Load key");
+        loadTextToDecryptButton = new JButton("Load text");
+        loadedKey = new JTextField(5);
+        decryptedText = new JTextField(5);
+        loadedTextToDecrypt = new JTextField(5);
 
-
-        JTextField secretKey = new JTextField("Secret key here");
-        c.gridx = 1;
-        c.gridy = 0;
-        c.insets = new Insets(0, 20, 0, 20);
-        this.add(secretKey, c);
-
-        //Simulate the look and feel of a jlabel so we can select the text
-        secretKey.setEditable(false);
-        secretKey.setBorder(null);
-        secretKey.setForeground(UIManager.getColor("Label.foreground"));
-        secretKey.setFont(UIManager.getFont("Label.font"));
-
-        genKey.addActionListener(e -> {
+        generateKeyButton.addActionListener(e -> {
             try {
                 secKey = SymmetricEnc.getSecretEncryptionKey();
-                secretKey.setText(SymmetricEnc.keyToString(secKey));
+                secretKeyField.setText(Utils.keyToString(secKey));
 
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
         });
 
-        JButton bt3 = new JButton("save key");
-        c.gridx = 2;
-        c.gridy = 0;
-        this.add(bt3, c);
-        bt3.addActionListener(e -> {
+
+        saveKeyButton.addActionListener(e -> {
             JTextField name = new JTextField();
             JTextField pw = new JTextField();
             Object[] fields = {
                     "Enter key name", name,
                     "Enter password", pw,
             };
-            JOptionPane.showConfirmDialog(null,fields,"Save key",JOptionPane.OK_CANCEL_OPTION);
+            JOptionPane.showConfirmDialog(null, fields, "Save key", JOptionPane.OK_CANCEL_OPTION);
 
             System.out.println(name.getText());
             System.out.println(pw.getText());
 
             try {
-                SymmetricEnc.storeKey(secKey,pw.getText(),name.getText(),name.getText());
+                SymmetricEnc.storeKey(secKey, pw.getText(), name.getText(), name.getText());
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
 
         });
 
-        JButton loadkey1 = new JButton("Load key from keystore");
-        c.gridx = 3;
-        c.gridy = 0;
-        this.add(loadkey1,c);
-        loadkey1.addActionListener(e -> {
+
+        loadKeyButton.addActionListener(e -> {
             JTextField name = new JTextField();
             JTextField pw = new JTextField();
             Object[] fields = {
                     "Enter key name", name,
                     "Enter password", pw,
             };
-            JOptionPane.showConfirmDialog(null,fields,"Load key",JOptionPane.OK_CANCEL_OPTION);
+            JOptionPane.showConfirmDialog(null, fields, "Load key", JOptionPane.OK_CANCEL_OPTION);
 
             System.out.println(name.getText());
             System.out.println(pw.getText());
 
             try {
-                secKey = SymmetricEnc.retrieveFromKeyStore(pw.getText(),name.getText());
-                secretKey.setText(SymmetricEnc.keyToString(secKey));
+                secKey = SymmetricEnc.retrieveFromKeyStore(pw.getText(), name.getText());
+                secretKeyField.setText(Utils.keyToString(secKey));
 
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
         });
 
-        JSeparator separator = new JSeparator();
-
-        c.gridwidth = 3;
-        c.gridx = 0;
-        c.gridy = 1;
-        c.fill = GridBagConstraints.HORIZONTAL;
-        this.add(separator, c);
-
-        JLabel encrypt = new JLabel("Encrypt");
-        c.gridwidth = 3;
-        c.gridx = 1;
-        c.gridy = 2;
-        c.fill = GridBagConstraints.HORIZONTAL;
-        this.add(encrypt, c);
-
-        JLabel enterClearText = new JLabel("Enter message to encrypt");
-        c.gridwidth = 1;
-        c.gridx = 0;
-        c.gridy = 3;
-        this.add(enterClearText, c);
-
-        JTextField plainText = new JTextField();
-        c.gridwidth = 1;
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.gridx = 1;
-        c.gridy = 3;
-        this.add(plainText, c);
-
-        JButton loadMsgtoEnc = new JButton("Load message to encrypt");
-        c.gridx = 2;
-        c.gridy = 3;
-        this.add(loadMsgtoEnc,c);
-        loadMsgtoEnc.addActionListener(e -> {
+        loadMessageToEncryptButton.addActionListener(e -> {
             JFileChooser file = new JFileChooser();
             file.setMultiSelectionEnabled(false);
             file.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
             file.setFileHidingEnabled(false);
             if (file.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 java.io.File f = file.getSelectedFile();
-                plainText.setText(Utils.extractMessage(f.getPath()));
+                messageToEncrypt.setText(Utils.extractMessage(f.getPath()));
             }
         });
 
-        JButton encryptButton = new JButton("Encrypt");
-        c.gridx = 1;
-        c.gridy = 4;
-        this.add(encryptButton,c);
-
-
-        JLabel encodedTextLabel = new JLabel("Encoded text:");
-        c.gridwidth = 1;
-        c.gridx = 0;
-        c.gridy = 5;
-        this.add(encodedTextLabel, c);
-
-
-        JTextField encoded = new JTextField ("WAKBFKDA;bngsbhieurbgailvberg");
-        encoded.setEditable(false);
-        encoded.setBorder(null);
-        encoded.setForeground(UIManager.getColor("Label.foreground"));
-        encoded.setFont(UIManager.getFont("Label.font"));
-        c.gridx = 1;
-        c.gridy = 5;
-        this.add(encoded, c);
-
         encryptButton.addActionListener(e -> {
-
             try {
-                encrypted = SymmetricEnc.encryptText(plainText.getText(),secKey);
-                encoded.setText(encrypted);
+                encrypted = SymmetricEnc.encryptText(messageToEncrypt.getText(), secKey);
+                encryptedMessage.setText(encrypted);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
         });
 
-        JButton saveEncrypted = new JButton("Save message");
-        c.gridx = 2;
-        c.gridy = 5;
-        this.add(saveEncrypted, c);
-        saveEncrypted.addActionListener(e -> {
+        saveMessageButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Specify a file to save");
 
@@ -191,122 +135,114 @@ public class SymmetricGUI extends JPanel implements EventListener {
             if (userSelection == JFileChooser.APPROVE_OPTION) {
                 File fileToSave = fileChooser.getSelectedFile();
                 try {
-                    Utils.saveEncryptedText(fileToSave.getAbsolutePath(),encoded.getText());
+                    Utils.saveEncryptedText(fileToSave.getAbsolutePath(), encryptedMessage.getText());
                 } catch (FileNotFoundException ex) {
                     throw new RuntimeException(ex);
                 }
             }
         });
 
-        JSeparator separator1 = new JSeparator();
-        c.gridx = 0;
-        c.gridy = 6;
-        c.gridwidth = 3;
-        c.fill = GridBagConstraints.HORIZONTAL;
-        this.add(separator1, c);
-
-        JLabel decryptLB = new JLabel("Decrypt");
-        c.gridwidth = 1;
-        c.gridx = 1;
-        c.gridy = 7;
-        this.add(decryptLB, c);
-
-        JLabel encryptedText = new JLabel("Enter text to decrypt");
-        c.gridx = 0;
-        c.gridy = 8;
-        this.add(encryptedText, c);
-
-
-
-        JTextField textToDecrypt = new JTextField();
-        c.gridx = 1;
-        c.gridy = 8;
-        this.add(textToDecrypt, c);
-
-        JButton loadText = new JButton("Load text from system");
-        c.gridx = 2;
-        c.gridy = 8;
-        this.add(loadText,c);
-        loadText.addActionListener(e -> {
+        loadTextToDecryptButton.addActionListener(e -> {
             JFileChooser file = new JFileChooser();
             file.setMultiSelectionEnabled(false);
             file.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
             file.setFileHidingEnabled(false);
             if (file.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 java.io.File f = file.getSelectedFile();
-                textToDecrypt.setText(Utils.extractMessage(f.getPath()));
-                encoded.setText(Utils.extractMessage(f.getPath()));
-
+                String decryptedmsg = Utils.extractMessage(f.getPath());
+                loadedTextToDecrypt.setText(decryptedmsg);
             }
         });
 
-        JLabel secretKeyLB = new JLabel("Enter secret key");
-        c.gridx = 0;
-        c.gridy = 9;
-        this.add(secretKeyLB, c);
-
-        JTextField enterKey = new JTextField();
-        c.gridx = 1;
-        c.gridy = 9;
-        this.add(enterKey, c);
-
-        JButton loadKey = new JButton("Load secret key from store");
-        c.gridx = 2;
-        c.gridy = 9;
-        this.add(loadKey, c);
-        loadKey.addActionListener(e -> {
+        loadKeyToDecryptButton.addActionListener(e -> {
             JTextField name = new JTextField();
             JTextField pw = new JTextField();
             Object[] fields = {
                     "Enter key name", name,
                     "Enter password", pw,
             };
-            JOptionPane.showConfirmDialog(null,fields,"Load key",JOptionPane.OK_CANCEL_OPTION);
+            JOptionPane.showConfirmDialog(null, fields, "Load key", JOptionPane.OK_CANCEL_OPTION);
 
             System.out.println(name.getText());
             System.out.println(pw.getText());
 
             try {
-                secKey = SymmetricEnc.retrieveFromKeyStore(pw.getText(),name.getText());
-                enterKey.setText(SymmetricEnc.keyToString(secKey));
+                secKey = SymmetricEnc.retrieveFromKeyStore(pw.getText(), name.getText());
+                loadedKey.setText(Utils.keyToString(secKey));
                 loadedFromStore = true;
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
         });
 
-        JButton decrypt = new JButton("Decrypt");
-
-        c.gridx = 1;
-        c.gridy = 10;
-        this.add(decrypt, c);
-
-        JLabel decodedmsg = new JLabel("Decoded msg here");
-        c.gridx = 1;
-        c.gridy = 11;
-        c.gridwidth = 3;
-        c.fill = GridBagConstraints.HORIZONTAL;
-        this.add(decodedmsg, c);
-
-        decrypt.addActionListener(e -> {
+        decryptButton.addActionListener(e -> {
             try {
-                System.out.println(encoded.getText());
                 if (loadedFromStore) {
-                    System.out.println("test");
-                    decrypted = SymmetricEnc.decryptText(encoded.getText(), secKey);
+                    decrypted = SymmetricEnc.decryptText(loadedTextToDecrypt.getText(), secKey);
                 }
-                System.out.println("test2");
                 // rebuild key using SecretKeySpec
-                System.out.println(SymmetricEnc.stringToAESKey(enterKey.getText()));
-                SecretKey originalKey = SymmetricEnc.stringToAESKey(enterKey.getText());
-                decrypted = SymmetricEnc.decryptText(encoded.getText(),originalKey);
+                SecretKey originalKey = SymmetricEnc.stringToAESKey(loadedKey.getText());
+                decrypted = SymmetricEnc.decryptText(loadedTextToDecrypt.getText(), originalKey);
                 loadedFromStore = false;
-
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
-            decodedmsg.setText(decrypted);
+            decryptedText.setText(decrypted);
         });
 
+
+
+
+        //adjust size and set layout
+        setPreferredSize(new Dimension(883, 530));
+        setLayout(null);
+        secretKeyField.setLineWrap(true);
+        secretKeyField.setBorder(new LineBorder(Color.black,1) {
+        });
+
+        messageToEncrypt.setLineWrap(true);
+        messageToEncrypt.setBorder(new LineBorder(Color.black,1));
+
+        encryptedMessage.setLineWrap(true);
+        encryptedMessage.setBorder(new LineBorder(Color.black,1));
+
+        //add components
+        add(generateKeyButton);
+        add(loadKeyButton);
+        add(saveKeyButton);
+        add(messageToEncrypt);
+        add(secretKeyField);
+        add(encryptButton);
+        add(loadMessageToEncryptButton);
+        add(saveMessageButton);
+        add(jcomp9);
+        add(jcomp10);
+        add(encryptedMessage);
+        add(decryptButton);
+        add(loadKeyToDecryptButton);
+        add(loadTextToDecryptButton);
+        add(loadedKey);
+        add(decryptedText);
+        add(loadedTextToDecrypt);
+
+        //set component bounds (only needed by Absolute Positioning)
+        generateKeyButton.setBounds(10, 25, 135, 25);
+        loadKeyButton.setBounds(10, 90, 100, 25);
+        saveKeyButton.setBounds(350, 55, 100, 25);
+        messageToEncrypt.setBounds(170, 225, 165, 95);
+        secretKeyField.setBounds(170, 20, 165, 95);
+        encryptButton.setBounds(360, 265, 135, 25);
+        loadMessageToEncryptButton.setBounds(5, 265, 130, 25);
+        saveMessageButton.setBounds(710, 265, 135, 25);
+        jcomp9.setBounds(105, 155, 175, 55);
+        jcomp10.setBounds(-380, 335, 100, 75);
+        encryptedMessage.setBounds(510, 225, 165, 95);
+        decryptButton.setBounds(370, 430, 100, 25);
+        loadKeyToDecryptButton.setBounds(10, 395, 100, 25);
+        loadTextToDecryptButton.setBounds(10, 450, 100, 25);
+        loadedKey.setBounds(130, 395, 220, 40);
+        decryptedText.setBounds(505, 395, 165, 95);
+        loadedTextToDecrypt.setBounds(130, 450, 220, 40);
     }
 }
+

@@ -1,8 +1,14 @@
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemWriter;
 import java.io.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.security.Key;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 
 
 public class Utils {
@@ -61,6 +67,104 @@ public class Utils {
         for (int i=0;i<secretKey.getEncoded().length;i++)
             hexKey.append(Integer.toHexString(0xFF & secretKey.getEncoded()[i]));
         return hexKey.toString();
+    }
+
+    public static void savePEM(KeyPair keyair, String filename) throws IOException {
+        Utils.privatePEM(keyair.getPrivate(),filename);
+        Utils.publicPEM(keyair.getPublic(),filename);
+    }
+
+    private static void privatePEM(PrivateKey privateKey,String filename) throws IOException {
+        PemObject pemObject = new PemObject("PRIVATE KEY",privateKey.getEncoded());
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        PemWriter pemWriter = new PemWriter(new OutputStreamWriter(byteArrayOutputStream));
+        pemWriter.writeObject(pemObject);
+        pemWriter.close();
+        FileWriter mywriter = new FileWriter(filename+"_private.pem");
+        mywriter.write(byteArrayOutputStream.toString());
+        mywriter.close();
+    }
+
+    private static void publicPEM(PublicKey privateKey, String filename) throws IOException {
+        PemObject pemObject = new PemObject("PUBLIC KEY",privateKey.getEncoded());
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        PemWriter pemWriter = new PemWriter(new OutputStreamWriter(byteArrayOutputStream));
+        pemWriter.writeObject(pemObject);
+        pemWriter.close();
+        FileWriter mywriter = new FileWriter(filename+"_public.pem");
+        mywriter.write(byteArrayOutputStream.toString());
+        mywriter.close();
+    }
+
+    public static String encode (byte[] toEncode){
+        return Base64.getEncoder().encodeToString(toEncode);
+    }
+
+    public static byte[] decode (String toDecode){
+        return Base64.getDecoder().decode(toDecode);
+    }
+
+
+    public static String getPrivateKeyPem(String filename) throws IOException {
+        // Read key from file
+
+        String strKeyPEM = "";
+        BufferedReader br = new BufferedReader(new FileReader(filename));
+        br.readLine(); // this will read the first line
+        String line;
+        while ((line = br.readLine()) != null) {
+            strKeyPEM += line;
+        }
+        br.close();
+        strKeyPEM = strKeyPEM.replace("-----END PRIVATE KEY-----", "");
+
+        return strKeyPEM;
+    }
+
+    public static String getPublicKeyPem(String filename) throws IOException {
+        // Read key from file
+
+        String strKeyPEM = "";
+        BufferedReader br = new BufferedReader(new FileReader(filename));
+        br.readLine(); // this will read the first line
+        String line;
+        while ((line = br.readLine()) != null) {
+            strKeyPEM += line;
+        }
+        br.close();
+        strKeyPEM = strKeyPEM.replace("-----END PUBLIC KEY-----", "");
+
+        return strKeyPEM;
+    }
+
+    public static PublicKey getPublicKeyFromString(String publicKeyString) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        X509EncodedKeySpec keySpecPublic = new X509EncodedKeySpec(Utils.decode(publicKeyString));
+
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+
+        return keyFactory.generatePublic(keySpecPublic);
+    }
+
+    public static PrivateKey getPrivateKeyFromString(String privateKeyString) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        PKCS8EncodedKeySpec keySpecPrivate = new PKCS8EncodedKeySpec(Utils.decode(privateKeyString));
+
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+
+        return keyFactory.generatePrivate(keySpecPrivate);
+    }
+
+    public static String keyToString(Key secretKey) {
+        /* Get key in encoding format */
+        byte[] encoded = secretKey.getEncoded();
+
+        /*
+         * Encodes the specified byte array into a String using Base64 encoding
+         * scheme
+         */
+
+        return Utils.encode(encoded);
     }
 }
 

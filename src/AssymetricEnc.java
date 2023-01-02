@@ -1,5 +1,11 @@
+import org.bouncycastle.crypto.fips.FipsDRBG;
+
 import javax.crypto.Cipher;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 
 public class AssymetricEnc {
     public static KeyPair buildKeyPair() throws NoSuchAlgorithmException {
@@ -9,29 +15,40 @@ public class AssymetricEnc {
         return keyPairGenerator.genKeyPair();
     }
 
-    public static byte[] encrypt(PrivateKey privateKey, String message) throws Exception {
+    public static String encrypt(PublicKey publicKey, String message) throws Exception {
         Cipher cipher = Cipher.getInstance("RSA");
-        cipher.init(Cipher.ENCRYPT_MODE, privateKey);
+        cipher.init(Cipher.ENCRYPT_MODE, publicKey);
 
-        return cipher.doFinal(message.getBytes());
+        byte[] cipherText = cipher.doFinal(message.getBytes(StandardCharsets.UTF_8));
+        return Utils.encode(cipherText);
     }
 
-    public static byte[] decrypt(PublicKey publicKey, byte [] encrypted) throws Exception {
+    public static String decrypt(PrivateKey privateKey, String encrypted) throws Exception {
         Cipher cipher = Cipher.getInstance("RSA");
-        cipher.init(Cipher.DECRYPT_MODE, publicKey);
+        cipher.init(Cipher.DECRYPT_MODE, privateKey);
 
-        return cipher.doFinal(encrypted);
+        byte[] cipherText = cipher.doFinal(Utils.decode(encrypted));
+        return new String(cipherText, StandardCharsets.UTF_8);
     }
+
 
     public static void main(String[] args) throws Exception {
         String toCode = "wah";
 
-        KeyPair keyPair = buildKeyPair();
-        byte[] encrypted = encrypt(keyPair.getPrivate(),toCode);
+        String pub = Utils.getPublicKeyPem("keypair1_public.pem");
+        String priv = Utils.getPrivateKeyPem("keypair1_private.pem");
 
-        byte[] decrypted = decrypt(keyPair.getPublic(),encrypted);
+        PrivateKey privateKey = Utils.getPrivateKeyFromString(priv);
+        PublicKey publicKey = Utils.getPublicKeyFromString(pub);
 
-        System.out.println(new String(decrypted));
+        System.out.println();
 
+        String encrypted = encrypt(publicKey,toCode);
+
+        String decoded = decrypt(privateKey,encrypted);
+
+        System.out.println(decoded);
+
+//        System.out.println(Utils.keyToString(publicKey));
     }
 }
