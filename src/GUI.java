@@ -59,7 +59,7 @@ public class GUI extends JFrame implements ActionListener {
         container.add(menu,"menu");
         container.add(symmetric,"symmetric");
         container.add(asymmetric,"asymmetric");
-        cardLayout.show(container,"asymmetric");
+        cardLayout.show(container,"menu");
     }
     public static void main(String[] args) {
         GUI c = new GUI();
