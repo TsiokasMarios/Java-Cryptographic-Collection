@@ -10,7 +10,7 @@ public class GUI extends JFrame implements ActionListener {
     JPanel menu = new JPanel();
     JPanel symmetric = new SymmetricGUI();
     JPanel asymmetric = new AsymmetricGUI();
-    JPanel sign = new JPanel();
+    JPanel sign = new DSGui();
 
     JButton goToSymmetric = new JButton();
     JButton goToAsymmetric = new JButton();
@@ -21,17 +21,19 @@ public class GUI extends JFrame implements ActionListener {
         container.setLayout(cardLayout);
         //***************************************************//
         //Buttons
-        goToSymmetric.setText("sym 1");
+        goToSymmetric.setText("Symmetric encryption");
         goToSymmetric.addActionListener(this);
         goToSymmetric.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        goToAsymmetric.setText("ass 2");
+        goToAsymmetric.setText("Asymmetric encryption");
         goToAsymmetric.addActionListener(this);
         goToAsymmetric.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        bt3.setText("Generate key");
-        bt3.addActionListener(this);
-        goToAsymmetric.setAlignmentX(Component.CENTER_ALIGNMENT);
+        goToSign.setText("Digital signature");
+        goToSign.addActionListener(this);
+        goToSign.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+
 
         //***************************************************//
         //Starting menu
@@ -39,19 +41,9 @@ public class GUI extends JFrame implements ActionListener {
         menu.setBackground(Color.BLUE);
         menu.add(goToSymmetric);
         menu.add(goToAsymmetric);
+        menu.add(goToSign);
         menu.add(Box.createRigidArea(new Dimension(0,150)));
 
-        //***************************************************//
-        //Symmetric "page"
-//        symmetric.setLayout(new BoxLayout(symmetric, BoxLayout.PAGE_AXIS));
-//        symmetric.add(bt3);
-//        symmetric.setBackground(Color.RED);
-        //***************************************************//
-        //Asymmetric "page"
-//        asymmetric.setLayout(new BoxLayout(asymmetric, BoxLayout.PAGE_AXIS));
-//        asymmetric.add(bt3);
-//        asymmetric.setBackground(Color.GREEN);
-        //***************************************************//
 
         setSize(900,800);
         setLocationRelativeTo(null);
@@ -59,6 +51,7 @@ public class GUI extends JFrame implements ActionListener {
         container.add(menu,"menu");
         container.add(symmetric,"symmetric");
         container.add(asymmetric,"asymmetric");
+        container.add(sign,"sign");
         cardLayout.show(container,"menu");
     }
     public static void main(String[] args) {
@@ -75,6 +68,8 @@ public class GUI extends JFrame implements ActionListener {
         }
         else if (e.getSource() == goToAsymmetric) {
             cardLayout.show(container,"asymmetric");
+        } else if (e.getSource() == goToSign) {
+            cardLayout.show(container, "sign");
         }
     }
 

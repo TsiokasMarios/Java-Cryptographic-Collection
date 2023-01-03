@@ -63,15 +63,15 @@ public class Utils {
 
 
     public static String keyToHex(Key secretKey){
-        StringBuffer hexKey = new StringBuffer();
+        StringBuilder hexKey = new StringBuilder();
         for (int i=0;i<secretKey.getEncoded().length;i++)
             hexKey.append(Integer.toHexString(0xFF & secretKey.getEncoded()[i]));
         return hexKey.toString();
     }
 
-    public static void savePEM(KeyPair keyair, String filename) throws IOException {
-        Utils.privatePEM(keyair.getPrivate(),filename);
-        Utils.publicPEM(keyair.getPublic(),filename);
+    public static void savePEM(KeyPair keyPair, String filename) throws IOException {
+        Utils.privatePEM(keyPair.getPrivate(),filename);
+        Utils.publicPEM(keyPair.getPublic(),filename);
     }
 
     private static void privatePEM(PrivateKey privateKey,String filename) throws IOException {
@@ -81,9 +81,9 @@ public class Utils {
         PemWriter pemWriter = new PemWriter(new OutputStreamWriter(byteArrayOutputStream));
         pemWriter.writeObject(pemObject);
         pemWriter.close();
-        FileWriter mywriter = new FileWriter(filename+"_private.pem");
-        mywriter.write(byteArrayOutputStream.toString());
-        mywriter.close();
+        FileWriter fileWriter = new FileWriter(filename+"_private.pem");
+        fileWriter.write(byteArrayOutputStream.toString());
+        fileWriter.close();
     }
 
     private static void publicPEM(PublicKey privateKey, String filename) throws IOException {
@@ -93,9 +93,9 @@ public class Utils {
         PemWriter pemWriter = new PemWriter(new OutputStreamWriter(byteArrayOutputStream));
         pemWriter.writeObject(pemObject);
         pemWriter.close();
-        FileWriter mywriter = new FileWriter(filename+"_public.pem");
-        mywriter.write(byteArrayOutputStream.toString());
-        mywriter.close();
+        FileWriter writer = new FileWriter(filename+"_public.pem");
+        writer.write(byteArrayOutputStream.toString());
+        writer.close();
     }
 
     public static String encode (byte[] toEncode){
@@ -110,33 +110,33 @@ public class Utils {
     public static String getPrivateKeyPem(String filename) throws IOException {
         // Read key from file
 
-        String strKeyPEM = "";
+        StringBuilder strKeyPEM = new StringBuilder();
         BufferedReader br = new BufferedReader(new FileReader(filename));
         br.readLine(); // this will read the first line
         String line;
         while ((line = br.readLine()) != null) {
-            strKeyPEM += line;
+            strKeyPEM.append(line);
         }
         br.close();
-        strKeyPEM = strKeyPEM.replace("-----END PRIVATE KEY-----", "");
+        strKeyPEM = new StringBuilder(strKeyPEM.toString().replace("-----END PRIVATE KEY-----", ""));
 
-        return strKeyPEM;
+        return strKeyPEM.toString();
     }
 
     public static String getPublicKeyPem(String filename) throws IOException {
         // Read key from file
 
-        String strKeyPEM = "";
+        StringBuilder strKeyPEM = new StringBuilder();
         BufferedReader br = new BufferedReader(new FileReader(filename));
         br.readLine(); // this will read the first line
         String line;
         while ((line = br.readLine()) != null) {
-            strKeyPEM += line;
+            strKeyPEM.append(line);
         }
         br.close();
-        strKeyPEM = strKeyPEM.replace("-----END PUBLIC KEY-----", "");
+        strKeyPEM = new StringBuilder(strKeyPEM.toString().replace("-----END PUBLIC KEY-----", ""));
 
-        return strKeyPEM;
+        return strKeyPEM.toString();
     }
 
     public static PublicKey getPublicKeyFromString(String publicKeyString) throws NoSuchAlgorithmException, InvalidKeySpecException {

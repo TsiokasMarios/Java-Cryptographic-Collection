@@ -72,7 +72,7 @@ public class AsymmetricGUI extends JPanel implements EventListener {
         
         generateKeyPairButton.addActionListener(e -> {
             try {
-                keyPair = AssymetricEnc.buildKeyPair();
+                keyPair = AsymmetricEnc.buildKeyPair();
                 publicKey = keyPair.getPublic();
                 privateKey = keyPair.getPrivate();
 
@@ -107,7 +107,7 @@ public class AsymmetricGUI extends JPanel implements EventListener {
                 return;
             }
             try {
-                encrypted = AssymetricEnc.encrypt(publicKey, loadedMessageToEncryptField.getText());
+                encrypted = AsymmetricEnc.encrypt(publicKey, loadedMessageToEncryptField.getText());
                 encryptedField.setText(encrypted);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(null, "Make .");
@@ -126,7 +126,7 @@ public class AsymmetricGUI extends JPanel implements EventListener {
             }
             try {
                 PrivateKey privateKey = Utils.getPrivateKeyFromString(loadedPrivateKeyField.getText());
-                decrypted = AssymetricEnc.decrypt(privateKey,loadedEncryptedTextField.getText());
+                decrypted = AsymmetricEnc.decrypt(privateKey,loadedEncryptedTextField.getText());
                 decryptedTextField.setText(decrypted);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
