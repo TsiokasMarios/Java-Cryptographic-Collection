@@ -35,6 +35,8 @@ public class DSGui extends JPanel implements EventListener {
     JLabel pubkeylabel;
     JLabel jcomp20;
 
+    JButton toMenu;
+
     DSGui() {
         //construct components
         generateKeyPair = new JButton("Generate Key pair");
@@ -57,6 +59,8 @@ public class DSGui extends JPanel implements EventListener {
         saveSignature = new JButton("Save signature");
         pubkeylabel = new JLabel("Public key");
         jcomp20 = new JLabel("Private key");
+        toMenu = new JButton("Back to menu");
+
 
         //adjust size and set layout
         setPreferredSize(new Dimension(944, 574));
@@ -248,7 +252,10 @@ public class DSGui extends JPanel implements EventListener {
             }catch (InvalidKeyException ex){
                 JOptionPane.showMessageDialog(null, "Wrong key.", "Error", JOptionPane.ERROR_MESSAGE);
             }
+        });
 
+        toMenu.addActionListener(e -> {
+            GUI.cardLayout.show(GUI.container,"menu");
         });
 
         privatekeyfield.setLineWrap(true);
@@ -278,6 +285,9 @@ public class DSGui extends JPanel implements EventListener {
         add(saveSignature);
         add(pubkeylabel);
         add(jcomp20);
+        add(toMenu);
+
+
 
         //set component bounds (only needed by Absolute Positioning)
         generateKeyPair.setBounds(45, 35, 140, 25);
@@ -300,5 +310,6 @@ public class DSGui extends JPanel implements EventListener {
         saveSignature.setBounds(625, 330, 120, 25);
         pubkeylabel.setBounds(310, 0, 100, 25);
         jcomp20.setBounds(580, 0, 100, 25);
+        toMenu.setBounds(380,600,150,20);
     }
 }

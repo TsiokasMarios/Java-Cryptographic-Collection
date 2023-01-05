@@ -29,6 +29,7 @@ public class SymmetricGUI extends JPanel implements EventListener {
     JTextField loadedKey;
     JTextField decryptedText;
     JTextField loadedTextToDecrypt;
+    JButton toMenu;
     SymmetricGUI() {
 
         //construct components
@@ -49,6 +50,7 @@ public class SymmetricGUI extends JPanel implements EventListener {
         loadedKey = new JTextField(5);
         decryptedText = new JTextField(5);
         loadedTextToDecrypt = new JTextField(5);
+        toMenu = new JButton("Back to menu");
 
         generateKeyButton.addActionListener(e -> {
             try {
@@ -211,7 +213,9 @@ public class SymmetricGUI extends JPanel implements EventListener {
             decryptedText.setText(decrypted);
         });
 
-
+        toMenu.addActionListener(e -> {
+            GUI.cardLayout.show(GUI.container,"menu");
+        });
 
 
         //adjust size and set layout
@@ -245,6 +249,7 @@ public class SymmetricGUI extends JPanel implements EventListener {
         add(loadedKey);
         add(decryptedText);
         add(loadedTextToDecrypt);
+        add(toMenu);
 
         //set component bounds (only needed by Absolute Positioning)
         generateKeyButton.setBounds(10, 25, 135, 25);
@@ -264,6 +269,7 @@ public class SymmetricGUI extends JPanel implements EventListener {
         loadedKey.setBounds(130, 395, 220, 40);
         decryptedText.setBounds(505, 395, 165, 95);
         loadedTextToDecrypt.setBounds(130, 450, 220, 40);
+        toMenu.setBounds(380,600,150,20);
     }
 }
 

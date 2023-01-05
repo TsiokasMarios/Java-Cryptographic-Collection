@@ -39,6 +39,8 @@ public class AsymmetricGUI extends JPanel implements EventListener {
     JButton decryptButton;
     JTextArea loadedEncryptedTextField;
 
+    JButton toMenu;
+
     AsymmetricGUI() {
 
 
@@ -62,6 +64,7 @@ public class AsymmetricGUI extends JPanel implements EventListener {
         decryptedTextField = new JTextArea (5, 5);
         decryptButton = new JButton ("Decrypt");
         loadedEncryptedTextField = new JTextArea (5, 5);
+        toMenu = new JButton("Back to menu");
 
         //set components properties
         privateKeyField.setToolTipText ("Public key");
@@ -240,6 +243,10 @@ public class AsymmetricGUI extends JPanel implements EventListener {
             }
         });
 
+        toMenu.addActionListener(e -> {
+            GUI.cardLayout.show(GUI.container,"menu");
+        });
+
         privateKeyField.setLineWrap(true);
         privateKeyField.setBorder(new LineBorder(Color.black,1));
 
@@ -281,6 +288,7 @@ public class AsymmetricGUI extends JPanel implements EventListener {
         add(decryptedTextField);
         add(decryptButton);
         add(loadedEncryptedTextField);
+        add(toMenu);
 
         //set component bounds (only needed by Absolute Positioning)
         generateKeyPairButton.setBounds (15, 20, 150, 35);
@@ -302,5 +310,6 @@ public class AsymmetricGUI extends JPanel implements EventListener {
         decryptedTextField.setBounds (515, 435, 165, 130);
         decryptButton.setBounds (385, 475, 100, 25);
         loadedEncryptedTextField.setBounds (195, 500, 165, 30);
+        toMenu.setBounds(380,600,150,20);
     }
 }
