@@ -15,7 +15,6 @@ public class GUI extends JFrame implements ActionListener {
     JButton goToSymmetric = new JButton();
     JButton goToAsymmetric = new JButton();
     JButton goToSign = new JButton();
-    JButton bt3 = new JButton();
 
     GUI(){
         container.setLayout(cardLayout);
@@ -38,14 +37,14 @@ public class GUI extends JFrame implements ActionListener {
         //***************************************************//
         //Starting menu
         menu.setLayout(new BoxLayout(menu, BoxLayout.PAGE_AXIS));
-        menu.setBackground(Color.BLUE);
+        menu.add(Box.createRigidArea(new Dimension(0,75)));
         menu.add(goToSymmetric);
+        menu.add(Box.createRigidArea(new Dimension(0,15)));
         menu.add(goToAsymmetric);
+        menu.add(Box.createRigidArea(new Dimension(0,15)));
         menu.add(goToSign);
-        menu.add(Box.createRigidArea(new Dimension(0,150)));
 
-
-        setSize(900,800);
+        setSize(300,300);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         container.add(menu,"menu");
@@ -63,12 +62,17 @@ public class GUI extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == goToSymmetric) {
-            this.setTitle("Symmetric encryption");
+            setSize(new Dimension(944, 674));
+            setTitle("Symmetric encryption");
             cardLayout.show(container, "symmetric");
         }
         else if (e.getSource() == goToAsymmetric) {
+            setSize(new Dimension(944, 713));
+            setTitle("Asymmetric encryption");
             cardLayout.show(container,"asymmetric");
         } else if (e.getSource() == goToSign) {
+            setSize(new Dimension(944, 674));
+            setTitle("Digital signature");
             cardLayout.show(container, "sign");
         }
     }

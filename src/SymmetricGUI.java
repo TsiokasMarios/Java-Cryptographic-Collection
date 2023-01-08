@@ -12,6 +12,7 @@ public class SymmetricGUI extends JPanel implements EventListener {
     String decrypted;
     Boolean loadedFromStore = false;
 
+    //Declare the components
     JButton generateKeyButton;
     JButton loadKeyButton;
     JButton saveKeyButton;
@@ -30,6 +31,7 @@ public class SymmetricGUI extends JPanel implements EventListener {
     JTextField decryptedText;
     JTextField loadedTextToDecrypt;
     JButton toMenu;
+
     SymmetricGUI() {
 
         //construct components
@@ -53,8 +55,21 @@ public class SymmetricGUI extends JPanel implements EventListener {
         toMenu = new JButton("Back to menu");
 
         generateKeyButton.addActionListener(e -> {
+            //Sources of randomness options
+            final String[] sources = {"DRBG","SHA1PRNG","WINDOWS-PRNG"};
+            //Key size options
+            final Integer[] sizes = {128,192,256};
+
+            //C
+            JComboBox<String> randomSources = new JComboBox<>(sources);
+            JComboBox<Integer> keySize = new JComboBox<>(sizes);
+            Object[] fields = {
+                    "Select source of randomness", randomSources,
+                    "Select key size", keySize,
+            };
+            JOptionPane.showConfirmDialog(null, fields, "Load key", JOptionPane.OK_CANCEL_OPTION);
             try {
-                secKey = SymmetricEnc.getSecretEncryptionKey();
+                secKey = SymmetricEnc.generateSecretKey(keySize.getItemAt(keySize.getSelectedIndex()), randomSources.getItemAt(randomSources.getSelectedIndex()));
                 secretKeyField.setText(Utils.keyToString(secKey));
 
             } catch (Exception ex) {
@@ -64,6 +79,7 @@ public class SymmetricGUI extends JPanel implements EventListener {
         });
 
         saveKeyButton.addActionListener(e -> {
+            //Display a window so the user can enter a name and password to store the key
             JTextField name = new JTextField();
             JTextField pw = new JTextField();
             Object[] fields = {
@@ -81,6 +97,7 @@ public class SymmetricGUI extends JPanel implements EventListener {
 
 
         loadKeyButton.addActionListener(e -> {
+            //Display a window so the user can enter a name and password to load a key
             JTextField name = new JTextField();
             JTextField pw = new JTextField();
             Object[] fields = {
@@ -102,25 +119,29 @@ public class SymmetricGUI extends JPanel implements EventListener {
         });
 
         loadMessageToEncryptButton.addActionListener(e -> {
+            //Create a filechooser so the user can load a text file to encrypt
             JFileChooser file = new JFileChooser();
             file.setMultiSelectionEnabled(false);
             file.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
             file.setFileHidingEnabled(false);
             if (file.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 java.io.File f = file.getSelectedFile();
-                if (!f.getName().toLowerCase().endsWith(".txt")){
+                if (!f.getName().toLowerCase().endsWith(".txt")){ //If selected file is not a text file prompt the user to select a valid text file
                     JOptionPane.showMessageDialog(null, "Please select a text file.", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
+                //Display the message to encrypt
                 messageToEncrypt.setText(Utils.extractMessage(f.getPath()));
             }
         });
+
         encryptButton.addActionListener(e -> {
-            if(secKey == null){
+            if(secKey == null){ //Make sure the user loaded or created a secret key
                 JOptionPane.showMessageDialog(null, "Please load or generate a secret key.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             try {
+                //Encrypted the message with the text from the messageToEncrypt field and with the generated or loaded key
                 encrypted = SymmetricEnc.encryptText(messageToEncrypt.getText(), secKey);
                 encryptedMessage.setText(encrypted);
             } catch (Exception ex) {
@@ -129,6 +150,7 @@ public class SymmetricGUI extends JPanel implements EventListener {
         });
 
         saveMessageButton.addActionListener(e -> {
+            //Create a filechooser so the user can choose where to save the file and with what name
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Specify a file to save");
 
@@ -146,13 +168,14 @@ public class SymmetricGUI extends JPanel implements EventListener {
         });
 
         loadTextToDecryptButton.addActionListener(e -> {
+            //Create a filechooser so the user can load a text file to decrypt
             JFileChooser file = new JFileChooser();
             file.setMultiSelectionEnabled(false);
             file.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
             file.setFileHidingEnabled(false);
             if (file.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 java.io.File f = file.getSelectedFile();
-                if (!f.getName().toLowerCase().endsWith(".txt")){
+                if (!f.getName().toLowerCase().endsWith(".txt")){ //If selected file is not a text file prompt the user to select a valid text file
                     JOptionPane.showMessageDialog(null, "Please select a text file.", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
@@ -162,6 +185,7 @@ public class SymmetricGUI extends JPanel implements EventListener {
         });
 
         loadKeyToDecryptButton.addActionListener(e -> {
+            //Display a window so the user can enter a name and password to load a key
             JTextField name = new JTextField();
             JTextField pw = new JTextField();
             Object[] fields = {
@@ -170,15 +194,14 @@ public class SymmetricGUI extends JPanel implements EventListener {
             };
             JOptionPane.showConfirmDialog(null, fields, "Load key", JOptionPane.OK_CANCEL_OPTION);
 
-            System.out.println(name.getText());
-            System.out.println(pw.getText());
-
             try {
                 secKey = SymmetricEnc.retrieveFromKeyStore(pw.getText(), name.getText());
-                if (secKey == null){
+                if (secKey == null){ //Secret key is null if user provided wrong username or password
                     JOptionPane.showMessageDialog(null, "Wrong key name or password. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
+                //Display the secret key
                 loadedKey.setText(Utils.keyToString(secKey));
+                //Set the loadedFromStore to true, will be used in decryption
                 loadedFromStore = true;
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
@@ -186,34 +209,38 @@ public class SymmetricGUI extends JPanel implements EventListener {
         });
 
         decryptButton.addActionListener(e -> {
-            if (loadedTextToDecrypt.getText().isEmpty()){
+            if (loadedTextToDecrypt.getText().isEmpty()){ //Prompts the user to enter or load a text file to decrypt if they haven't chosen one
                 JOptionPane.showMessageDialog(null, "Please load or enter the text to be decrypted.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             try {
-                if (loadedFromStore) {
+                if (loadedFromStore) { //If the user loaded a key from a keystore
                     if (secKey == null) {
                         JOptionPane.showMessageDialog(null, "Please load or enter a secret key.", "Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
+                    //Decrypts the text with the loaded secret key
                     decrypted = SymmetricEnc.decryptText(loadedTextToDecrypt.getText(), secKey);
                 }
                 if (loadedKey.getText().isEmpty()){
                     JOptionPane.showMessageDialog(null, "Please enter or load a secret key.", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                // rebuild key using SecretKeySpec
+                // Convert the string to key
                 SecretKey originalKey = SymmetricEnc.stringToAESKey(loadedKey.getText());
+                //Decrypt the message
                 decrypted = SymmetricEnc.decryptText(loadedTextToDecrypt.getText(), originalKey);
                 loadedFromStore = false;
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(null, "Something went wrong.", "Error", JOptionPane.ERROR_MESSAGE);
                 throw new RuntimeException(ex);
             }
+            //Display the decrypted text
             decryptedText.setText(decrypted);
         });
 
         toMenu.addActionListener(e -> {
+            setSize(new Dimension(150,150));
             GUI.cardLayout.show(GUI.container,"menu");
         });
 

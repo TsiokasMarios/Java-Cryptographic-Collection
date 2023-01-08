@@ -1,3 +1,4 @@
+import javax.crypto.BadPaddingException;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
@@ -18,6 +19,8 @@ public class AsymmetricGUI extends JPanel implements EventListener {
     PrivateKey privateKey;
     String encrypted;
     String decrypted;
+
+    //Declare all the components
 
     JButton generateKeyPairButton;
     JButton loadPrivateKeyButton;
@@ -74,11 +77,27 @@ public class AsymmetricGUI extends JPanel implements EventListener {
         setLayout (null);
         
         generateKeyPairButton.addActionListener(e -> {
+            //Options for the dropdown menus
+            final String[] sources = {"DRBG","SHA1PRNG","WINDOWS-PRNG"};
+            final Integer[] sizes = {512,1024,2048,4096,8192};
+
+            JComboBox<String> randomSources = new JComboBox<>(sources);
+            JComboBox<Integer> keySize = new JComboBox<>(sizes);
+            //Object aray that stores the comboboxes and their names
+            Object[] fields = {
+                    "Select source of randomness", randomSources,
+                    "Select key size", keySize,
+            };
+            //Show the dialo
+            JOptionPane.showConfirmDialog(null, fields, "Configure key", JOptionPane.OK_CANCEL_OPTION);
+
             try {
-                keyPair = AsymmetricEnc.buildKeyPair();
+                //Generate the key
+                keyPair = AsymmetricEnc.generateKeyPair(keySize.getItemAt(keySize.getSelectedIndex()), randomSources.getItemAt(randomSources.getSelectedIndex()));
+                //Get the public and private keys
                 publicKey = keyPair.getPublic();
                 privateKey = keyPair.getPrivate();
-
+                //Set the private and public key fields to show the key
                 privateKeyField.setText(Utils.keyToString(privateKey));
                 publicKeyField.setText(Utils.keyToString(publicKey));
 
@@ -88,6 +107,7 @@ public class AsymmetricGUI extends JPanel implements EventListener {
         });
 
         saveKeysButton.addActionListener(e -> {
+            //Create a file chooser so the user can choose where to save the key
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Specify a file to save");
 
@@ -105,45 +125,57 @@ public class AsymmetricGUI extends JPanel implements EventListener {
         });
 
         encryptButton.addActionListener(e -> {
-            if (encrypted == null) {
+            if (publicKey == null) { //Makes sure the user has generated or loaded a public key
                 JOptionPane.showMessageDialog(null, "Load or generate a public key.", "Bad key", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+            if (loadedMessageToEncryptField.getText().isEmpty()){ //Make sure the user has entered or loaded a message to encrypt
+                JOptionPane.showMessageDialog(null, "Load or enter a message to encrypt.", "No message to encrypt", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             try {
+                //Encrypt the message that was provided with the public key that was either generated or loaded
                 encrypted = AsymmetricEnc.encrypt(publicKey, loadedMessageToEncryptField.getText());
+                //Show the encrypted text
                 encryptedField.setText(encrypted);
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(null, "Make .");
                 throw new RuntimeException(ex);
             }
         });
 
         decryptButton.addActionListener(e -> {
-            if (loadedPrivateKeyField.getText() == null) {
+            if (loadedPrivateKeyField.getText() == null) { //Make sure the user has generated or loaded a private key
                 JOptionPane.showMessageDialog(null, "Load or enter a private key.", "Bad key", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            if (loadedEncryptedTextField.getText() == null) {
+            if (loadedEncryptedTextField.getText() == null) { //Make sure the user has entered or loaded a message to decrypt
                 JOptionPane.showMessageDialog(null, "Please enter a message to decrypt.", "Bad key", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             try {
-                PrivateKey privateKey = Utils.getPrivateKeyFromString(loadedPrivateKeyField.getText());
+                //Generate the private key from the string that is in the loaded private key field
+                PrivateKey privateKey = Utils.getPrivateKeyFromString(loadedPrivateKeyField.getText(),"RSA");
+                //Decrypt the message
                 decrypted = AsymmetricEnc.decrypt(privateKey,loadedEncryptedTextField.getText());
+                //Show the decrypted message
                 decryptedTextField.setText(decrypted);
-            } catch (Exception ex) {
+            }catch (BadPaddingException ex){
+                JOptionPane.showMessageDialog(null, "Wrong private key.", "Bad key", JOptionPane.ERROR_MESSAGE);
+            }
+            catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
         });
 
         loadMessageToEncryptButton.addActionListener(e -> {
+            //Create a file choose so the user can load a text file from their system
             JFileChooser file = new JFileChooser();
             file.setMultiSelectionEnabled(false);
             file.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
             file.setFileHidingEnabled(false);
             if (file.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 java.io.File f = file.getSelectedFile();
-                if (f.getName().toLowerCase().endsWith(".txt"))
+                if (f.getName().toLowerCase().endsWith(".txt")) //Makes sure the selected file is a text file
                     loadedMessageToEncryptField.setText(Utils.extractMessage(f.getPath()));
                 else {
                     JOptionPane.showMessageDialog(null, "Please select a text file.", "Wrong file type", JOptionPane.ERROR_MESSAGE);
@@ -152,6 +184,7 @@ public class AsymmetricGUI extends JPanel implements EventListener {
         });
 
         saveEncryptedMessage.addActionListener(e -> {
+            //Similar to saving keys
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Specify a file to save");
 
@@ -160,7 +193,7 @@ public class AsymmetricGUI extends JPanel implements EventListener {
             if (userSelection == JFileChooser.APPROVE_OPTION) {
                 File fileToSave = fileChooser.getSelectedFile();
                 try {
-                    Utils.saveEncryptedText(fileToSave.getAbsolutePath(), loadedMessageToEncryptField.getText());
+                    Utils.saveEncryptedText(fileToSave.getAbsolutePath(), encryptedField.getText());
                 } catch (FileNotFoundException ex) {
                     JOptionPane.showMessageDialog(null, "Something went wrong.", "Error", JOptionPane.ERROR_MESSAGE);
                     throw new RuntimeException(ex);
@@ -169,18 +202,19 @@ public class AsymmetricGUI extends JPanel implements EventListener {
         });
 
         loadPrivateKey2.addActionListener(e -> {
+            //Similar as load private key
             JFileChooser file = new JFileChooser();
             file.setMultiSelectionEnabled(false);
             file.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
             file.setFileHidingEnabled(false);
             if (file.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 java.io.File f = file.getSelectedFile();
-                if (!f.getName().toLowerCase().endsWith(".pem")){
+                if (!f.getName().toLowerCase().endsWith(".pem")){ //Makes sure the file is a pem file
                     JOptionPane.showMessageDialog(null, "Please select a pem file.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
                 try {
                     String toKey = Utils.getPrivateKeyPem(f.getAbsolutePath());
-                    privateKey = Utils.getPrivateKeyFromString(toKey);
+                    privateKey = Utils.getPrivateKeyFromString(toKey,"RSA");
                 } catch (IOException | NoSuchAlgorithmException ex) {
                     throw new RuntimeException(ex);
                 }catch (InvalidKeySpecException ex){
@@ -191,25 +225,33 @@ public class AsymmetricGUI extends JPanel implements EventListener {
         });
 
         loadEncryptedTextButton.addActionListener(e -> {
+            //Similar as the load decrypted text
             JFileChooser file = new JFileChooser();
             file.setMultiSelectionEnabled(false);
             file.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
             file.setFileHidingEnabled(false);
             if (file.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 java.io.File f = file.getSelectedFile();
-                String decryptedmsg = Utils.extractMessage(f.getPath());
-                loadedEncryptedTextField.setText(decryptedmsg);
+                if (f.getName().toLowerCase().endsWith(".txt")) {//Makes sure the provided file is a text file
+                    String decryptedmsg = Utils.extractMessage(f.getPath());
+                    loadedEncryptedTextField.setText(decryptedmsg);
+                }
+                else {
+                    JOptionPane.showMessageDialog(null, "Please select a text file.", "Wrong file type", JOptionPane.ERROR_MESSAGE);
+                }
+
             }
         });
 
         loadPrivateKeyButton.addActionListener(e -> {
+            //Create file chooser so the user can select their private key pem file
             JFileChooser file = new JFileChooser();
             file.setMultiSelectionEnabled(false);
             file.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
             file.setFileHidingEnabled(false);
             if (file.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 java.io.File f = file.getSelectedFile();
-                if (!f.getName().toLowerCase().endsWith(".pem")){
+                if (!f.getName().toLowerCase().endsWith(".pem")){ //Makes sure the file is a pem file
                     JOptionPane.showMessageDialog(null, "Please select a pem file.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
                 String key;
@@ -223,29 +265,29 @@ public class AsymmetricGUI extends JPanel implements EventListener {
         });
 
         loadPublicKeyButton.addActionListener(e -> {
+            //Create file chooser so the user can select their public key pem file
             JFileChooser file = new JFileChooser();
             file.setMultiSelectionEnabled(false);
             file.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
             file.setFileHidingEnabled(false);
             if (file.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 java.io.File f = file.getSelectedFile();
-                if (!f.getName().toLowerCase().endsWith(".pem")){
+                if (!f.getName().toLowerCase().endsWith(".pem")){ //Makes sure the file is a pem file
                     JOptionPane.showMessageDialog(null, "Please select a pem file.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
                 String key;
                 try {
                     key = Utils.getPublicKeyPem(f.getPath());
                     publicKeyField.setText(key);
-                    publicKey = Utils.getPublicKeyFromString(key);
+                    publicKey = Utils.getPublicKeyFromString(key,"RSA");
                 } catch (NoSuchAlgorithmException | InvalidKeySpecException | IOException ex) {
                     throw new RuntimeException(ex);
                 }
             }
         });
 
-        toMenu.addActionListener(e -> {
-            GUI.cardLayout.show(GUI.container,"menu");
-        });
+        //Switch to menu window
+        toMenu.addActionListener(e -> GUI.cardLayout.show(GUI.container,"menu"));
 
         privateKeyField.setLineWrap(true);
         privateKeyField.setBorder(new LineBorder(Color.black,1));
@@ -268,7 +310,7 @@ public class AsymmetricGUI extends JPanel implements EventListener {
         decryptedTextField.setLineWrap(true);
         decryptedTextField.setBorder(new LineBorder(Color.black,1));
 
-        //add components
+        //add components to the panel
         add(generateKeyPairButton);
         add(loadPrivateKeyButton);
         add(privateKeyField);
@@ -290,7 +332,7 @@ public class AsymmetricGUI extends JPanel implements EventListener {
         add(loadedEncryptedTextField);
         add(toMenu);
 
-        //set component bounds (only needed by Absolute Positioning)
+        //set component positions and sizes
         generateKeyPairButton.setBounds (15, 20, 150, 35);
         loadPrivateKeyButton.setBounds (15, 70, 150, 25);
         privateKeyField.setBounds (460, 25, 255, 195);

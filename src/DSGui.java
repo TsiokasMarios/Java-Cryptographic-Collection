@@ -14,6 +14,8 @@ public class DSGui extends JPanel implements EventListener {
     PublicKey publicKey;
     PrivateKey privateKey;
     String filepath;
+
+    //Declare the components
     JButton generateKeyPair;
     JButton loadPrivateKey;
     JButton loadPublicKey;
@@ -27,13 +29,14 @@ public class DSGui extends JPanel implements EventListener {
     JButton loadSigToVerify;
     JLabel sigNameLabel;
     JTextArea signatureNameField;
-    JButton loadFilleToVer;
+    JButton loadFileToVer;
     JTextArea fileNameField;
     JLabel fileNameLabel2;
     JButton verifySignatureButton;
     JButton saveSignature;
     JLabel pubkeylabel;
     JLabel jcomp20;
+
 
     JButton toMenu;
 
@@ -52,7 +55,7 @@ public class DSGui extends JPanel implements EventListener {
         loadSigToVerify = new JButton("Load signature to verify");
         sigNameLabel = new JLabel("Signature name");
         signatureNameField = new JTextArea(5, 5);
-        loadFilleToVer = new JButton("Load file to verify");
+        loadFileToVer = new JButton("Load file to verify");
         fileNameField = new JTextArea(5, 5);
         fileNameLabel2 = new JLabel("File name");
         verifySignatureButton = new JButton("Verify");
@@ -61,17 +64,33 @@ public class DSGui extends JPanel implements EventListener {
         jcomp20 = new JLabel("Private key");
         toMenu = new JButton("Back to menu");
 
-
         //adjust size and set layout
         setPreferredSize(new Dimension(944, 574));
         setLayout(null);
 
         generateKeyPair.addActionListener(e -> {
+
+            //Sources of randomness options
+            final String[] sources = {"DRBG","SHA1PRNG","WINDOWS-PRNG"};
+            //Key size options
+            final Integer[] sizes = {512,1024,2048,3072};
+
+            //Comboboxes so the user can select source of randomness and key size
+            JComboBox<String> randomSources = new JComboBox<>(sources);
+            JComboBox<Integer> keySize = new JComboBox<>(sizes);
+            Object[] fields = {
+                    "Select source of randomness", randomSources,
+                    "Select key size", keySize,
+            };
+            JOptionPane.showConfirmDialog(null, fields, "Load key", JOptionPane.OK_CANCEL_OPTION);
             try {
-                keyPair = DS.buildKeyPair(512);
+                //Generate the keypair with the keysize and source of randomnes
+                keyPair = DS.generateKeyPair(keySize.getItemAt(keySize.getSelectedIndex()), randomSources.getItemAt(randomSources.getSelectedIndex()));
+                //Get public and private key
                 publicKey = keyPair.getPublic();
                 privateKey = keyPair.getPrivate();
 
+                //Show the keys in their respective fields
                 privatekeyfield.setText(Utils.keyToString(privateKey));
                 publickeyfield.setText(Utils.keyToString(publicKey));
 
@@ -81,6 +100,7 @@ public class DSGui extends JPanel implements EventListener {
         });
 
         saveKeys.addActionListener(e -> {
+            //Create filechooser so teh user can select where to save the keys
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Specify a file to save");
 
@@ -98,6 +118,7 @@ public class DSGui extends JPanel implements EventListener {
         });
 
         loadFileToSign.addActionListener(e -> {
+            //Creates a filechooser so the user can select the file to sign
             JFileChooser file = new JFileChooser();
             file.setMultiSelectionEnabled(false);
             file.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
@@ -109,7 +130,8 @@ public class DSGui extends JPanel implements EventListener {
             }
         });
 
-        loadFilleToVer.addActionListener(e -> {
+        loadFileToVer.addActionListener(e -> {
+            //Creates a file chooser that lets the user choose a file to verify with a signature
             JFileChooser file = new JFileChooser();
             file.setMultiSelectionEnabled(false);
             file.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
@@ -117,21 +139,23 @@ public class DSGui extends JPanel implements EventListener {
             if (file.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 java.io.File f = file.getSelectedFile();
                 fileNameField.setText(f.getName());
+                filepath=f.getAbsolutePath();
             }
         });
 
         loadSigToVerify.addActionListener(e -> {
+            //Creates a file chooser that lets the user choose a signature to verify
             JFileChooser file = new JFileChooser();
             file.setMultiSelectionEnabled(false);
             file.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
             file.setFileHidingEnabled(false);
             if (file.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 java.io.File f = file.getSelectedFile();
-                if (!f.getName().toLowerCase().endsWith(".sig")) {
+                if (!f.getName().toLowerCase().endsWith(".sig")) { //Make sure the file selected is a signature file
                     JOptionPane.showMessageDialog(null, "Please select a proper signature file. Signature file ends in .sig.", "Wrong file type", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                signatureNameField.setText(f.getName());
+                signatureNameField.setText(f.getName()); //Show signature file name
                 try {
                     sign = DS.loadSignature(f.getAbsolutePath());
                 } catch (IOException ex) {
@@ -141,18 +165,20 @@ public class DSGui extends JPanel implements EventListener {
         });
 
         signButton.addActionListener(e -> {
-            if (publickeyfield.getText().isEmpty()){
+            if (publickeyfield.getText().isEmpty()){ //Make sure the public key field is not empty
                 JOptionPane.showMessageDialog(null, "Please generate or load a public key.", "Wrong file type", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            if (fileToSignName.getText().isEmpty()){
+            if (fileToSignName.getText().isEmpty()){ //Make sure the user has chosen a file to sign
                 JOptionPane.showMessageDialog(null, "Please select a file to sign.", "Wrong file type", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             try {
-                Signature signature = DS.createSignature();
-                System.out.println(privateKey);
+                //Create the signature
+                Signature signature = Signature.getInstance("DSA");
+                //Initialize the signature
                 DS.initSignatureToSign(privateKey,signature);
+                //Sign the data
                 sign = DS.signData(filepath,signature);
                 JOptionPane.showMessageDialog(null, "File signed successfully.", "Wrong file type", JOptionPane.INFORMATION_MESSAGE);
             } catch (NoSuchAlgorithmException | InvalidKeyException | IOException | SignatureException ex) {
@@ -161,6 +187,7 @@ public class DSGui extends JPanel implements EventListener {
         });
 
         saveSignature.addActionListener(e -> {
+            //Create a filechooser so the user can choose where to save the signature
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Save signature");
 
@@ -169,7 +196,7 @@ public class DSGui extends JPanel implements EventListener {
             if (userSelection == JFileChooser.APPROVE_OPTION) {
                 File fileToSave = fileChooser.getSelectedFile();
                 try {
-                    DS.saveSignature(fileToSave.getAbsolutePath(),sign);
+                    DS.saveSignature(fileToSave.getAbsolutePath(),sign); //Save the signed data
                 } catch (FileNotFoundException ex) {
                     JOptionPane.showMessageDialog(null, "Something went wrong.", "Error", JOptionPane.ERROR_MESSAGE);
                     throw new RuntimeException(ex);
@@ -180,18 +207,22 @@ public class DSGui extends JPanel implements EventListener {
         });
 
         loadPrivateKey.addActionListener(e -> {
+            //Create file chooser so the user can load a private key file from their system
             JFileChooser file = new JFileChooser();
             file.setMultiSelectionEnabled(false);
             file.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
             file.setFileHidingEnabled(false);
             if (file.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 java.io.File f = file.getSelectedFile();
-                if (!f.getName().toLowerCase().endsWith(".pem")){
+                if (!f.getName().toLowerCase().endsWith(".pem")){ //If the file is not a .pem file ask the user to select a valid pem file
                     JOptionPane.showMessageDialog(null, "Please select a pem file.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
                 try {
+                    //Get private key
                     String toKey = Utils.getPrivateKeyPem(f.getAbsolutePath());
-                    privateKey = Utils.getPrivateKeyFromString(toKey);
+                    //Convert the string to a key
+                    privateKey = Utils.getPrivateKeyFromString(toKey,"DSA");
+                    //display the key
                     privatekeyfield.setText(toKey);
                 } catch (IOException | NoSuchAlgorithmException ex) {
                     throw new RuntimeException(ex);
@@ -202,43 +233,51 @@ public class DSGui extends JPanel implements EventListener {
         });
 
         loadPublicKey.addActionListener(e -> {
+            //Create file chooser so the user can load a public key file from their system
             JFileChooser file = new JFileChooser();
             file.setMultiSelectionEnabled(false);
             file.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
             file.setFileHidingEnabled(false);
             if (file.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 java.io.File f = file.getSelectedFile();
-                if (!f.getName().toLowerCase().endsWith(".pem")){
+                if (!f.getName().toLowerCase().endsWith(".pem")){ //If the file is not a .pem file ask the user to select a valid pem file
                     JOptionPane.showMessageDialog(null, "Please select a pem file.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
                 try {
+                    //Get public key
                     String toKey = Utils.getPublicKeyPem(f.getAbsolutePath());
-                    publicKey = Utils.getPublicKeyFromString(toKey);
+                    //Convert the string to a key
+                    publicKey = Utils.getPublicKeyFromString(toKey,"DSA");
+                    //Display the key
                     publickeyfield.setText(toKey);
                 } catch (IOException | NoSuchAlgorithmException ex) {
                     throw new RuntimeException(ex);
                 }catch (InvalidKeySpecException ex){
                     JOptionPane.showMessageDialog(null, "Wrong key. Please enter correct private key.", "Error", JOptionPane.ERROR_MESSAGE);
+                    ex.printStackTrace();
                 }
             }
         });
 
         verifySignatureButton.addActionListener(e -> {
-            if (signatureNameField.getText().isEmpty()){
+            if (signatureNameField.getText().isEmpty()){ //Make sure the user has loaded a signature
                 JOptionPane.showMessageDialog(null, "Please load a signature to validate.", "Error", JOptionPane.ERROR_MESSAGE);
             }
-            if (fileNameField.getText().isEmpty()){
+            if (fileNameField.getText().isEmpty()){ //Make sure the user has loaded a file
                 JOptionPane.showMessageDialog(null, "Please load a file to validate.", "Error", JOptionPane.ERROR_MESSAGE);
             }
-            if (publicKey == null){
+            if (publicKey == null){ //Make sure the user has loaded or generate a public key
                 JOptionPane.showMessageDialog(null, "Please load a public key to use for validation.", "Error", JOptionPane.ERROR_MESSAGE);
             }
             try {
-                Signature signature = DS.createSignature();
+                //Create the signature
+                Signature signature = Signature.getInstance("DSA");
+                //Initialize the signature in verification mode
                 DS.initSignatureToVer(publicKey,signature);
+                //Validate the signature
                 DS.validateSignature(filepath,signature);
-                if (signature.verify(sign)){
-                    JOptionPane.showMessageDialog(null, "Signature is valid.", "Error", JOptionPane.ERROR_MESSAGE);
+                if (signature.verify(sign)){ //If the signature is valid display a success message
+                    JOptionPane.showMessageDialog(null, "Signature is valid.", "Error", JOptionPane.INFORMATION_MESSAGE);
                 }
                 else {
                     JOptionPane.showMessageDialog(null, "Invalid signature.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -255,6 +294,7 @@ public class DSGui extends JPanel implements EventListener {
         });
 
         toMenu.addActionListener(e -> {
+            setSize(new Dimension(150,150));
             GUI.cardLayout.show(GUI.container,"menu");
         });
 
@@ -264,7 +304,7 @@ public class DSGui extends JPanel implements EventListener {
         publickeyfield.setLineWrap(true);
         publickeyfield.setBorder(new LineBorder(Color.black,1));
 
-        //add components
+        //add components to the panel
         add(generateKeyPair);
         add(loadPrivateKey);
         add(loadPublicKey);
@@ -278,7 +318,7 @@ public class DSGui extends JPanel implements EventListener {
         add(loadSigToVerify);
         add(sigNameLabel);
         add(signatureNameField);
-        add(loadFilleToVer);
+        add(loadFileToVer);
         add(fileNameField);
         add(fileNameLabel2);
         add(verifySignatureButton);
@@ -289,7 +329,7 @@ public class DSGui extends JPanel implements EventListener {
 
 
 
-        //set component bounds (only needed by Absolute Positioning)
+        //set component positions and sizes
         generateKeyPair.setBounds(45, 35, 140, 25);
         loadPrivateKey.setBounds(45, 95, 140, 25);
         loadPublicKey.setBounds(45, 155, 140, 25);
@@ -303,7 +343,7 @@ public class DSGui extends JPanel implements EventListener {
         loadSigToVerify.setBounds(40, 400, 175, 25);
         sigNameLabel.setBounds(270, 370, 100, 25);
         signatureNameField.setBounds(270, 405, 155, 20);
-        loadFilleToVer.setBounds(40, 455, 175, 25);
+        loadFileToVer.setBounds(40, 455, 175, 25);
         fileNameField.setBounds(270, 465, 155, 20);
         fileNameLabel2.setBounds(270, 435, 100, 25);
         verifySignatureButton.setBounds(505, 435, 100, 25);
