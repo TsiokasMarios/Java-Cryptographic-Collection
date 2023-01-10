@@ -60,21 +60,23 @@ public class SymmetricGUI extends JPanel implements EventListener {
             //Key size options
             final Integer[] sizes = {128,192,256};
 
-            //C
+
             JComboBox<String> randomSources = new JComboBox<>(sources);
             JComboBox<Integer> keySize = new JComboBox<>(sizes);
             Object[] fields = {
                     "Select source of randomness", randomSources,
                     "Select key size", keySize,
             };
-            JOptionPane.showConfirmDialog(null, fields, "Load key", JOptionPane.OK_CANCEL_OPTION);
-            try {
-                secKey = SymmetricEnc.generateSecretKey(keySize.getItemAt(keySize.getSelectedIndex()), randomSources.getItemAt(randomSources.getSelectedIndex()));
-                secretKeyField.setText(Utils.keyToString(secKey));
+            int choice = JOptionPane.showConfirmDialog(null, fields, "Load key", JOptionPane.OK_CANCEL_OPTION);
+            if (choice == 0) { //Check if the user pressed ok
+                try {
+                    secKey = SymmetricEnc.generateSecretKey(keySize.getItemAt(keySize.getSelectedIndex()), randomSources.getItemAt(randomSources.getSelectedIndex()));
+                    secretKeyField.setText(Utils.keyToString(secKey));
 
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(null, "Something went wrong generating a key.", "Error", JOptionPane.ERROR_MESSAGE);
-                throw new RuntimeException(ex);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "Something went wrong generating a key.", "Error", JOptionPane.ERROR_MESSAGE);
+                    throw new RuntimeException(ex);
+                }
             }
         });
 
@@ -86,12 +88,15 @@ public class SymmetricGUI extends JPanel implements EventListener {
                     "Enter key name", name,
                     "Enter password", pw,
             };
-            JOptionPane.showConfirmDialog(null, fields, "Save key", JOptionPane.OK_CANCEL_OPTION);
-            try {
-                SymmetricEnc.storeKey(secKey, pw.getText(), name.getText(), name.getText());
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(null, "Something went wrong. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
-                throw new RuntimeException(ex);
+            int choice = JOptionPane.showConfirmDialog(null, fields, "Save key", JOptionPane.OK_CANCEL_OPTION);
+            if (choice == 0) { //Check if the user pressed ok
+                try {
+                    System.out.println(name.getText());
+                    SymmetricEnc.storeKey(secKey, pw.getText(), name.getText(), name.getText());
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "Something went wrong. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+                    throw new RuntimeException(ex);
+                }
             }
         });
 
@@ -104,17 +109,18 @@ public class SymmetricGUI extends JPanel implements EventListener {
                     "Enter key name", name,
                     "Enter password", pw,
             };
-            JOptionPane.showConfirmDialog(null, fields, "Load key", JOptionPane.OK_CANCEL_OPTION);
+            int choice = JOptionPane.showConfirmDialog(null, fields, "Load key", JOptionPane.OK_CANCEL_OPTION);
+            if (choice == 0) { //Check if the user pressed ok
+                try {
+                    secKey = SymmetricEnc.retrieveFromKeyStore(pw.getText(), name.getText());
+                    if (secKey == null) {
+                        JOptionPane.showMessageDialog(null, "Wrong credentials were given, please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                    secretKeyField.setText(Utils.keyToString(secKey));
 
-            try {
-                secKey = SymmetricEnc.retrieveFromKeyStore(pw.getText(), name.getText());
-                if (secKey == null){
-                    JOptionPane.showMessageDialog(null, "Wrong credentials were given, please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
                 }
-                secretKeyField.setText(Utils.keyToString(secKey));
-
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
             }
         });
 
@@ -192,19 +198,20 @@ public class SymmetricGUI extends JPanel implements EventListener {
                     "Enter key name", name,
                     "Enter password", pw,
             };
-            JOptionPane.showConfirmDialog(null, fields, "Load key", JOptionPane.OK_CANCEL_OPTION);
-
-            try {
-                secKey = SymmetricEnc.retrieveFromKeyStore(pw.getText(), name.getText());
-                if (secKey == null){ //Secret key is null if user provided wrong username or password
-                    JOptionPane.showMessageDialog(null, "Wrong key name or password. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+            int choice = JOptionPane.showConfirmDialog(null, fields, "Load key", JOptionPane.OK_CANCEL_OPTION);
+            if (choice == 0) { //Check if the user pressed ok
+                try {
+                    secKey = SymmetricEnc.retrieveFromKeyStore(pw.getText(), name.getText());
+                    if (secKey == null) { //Secret key is null if user provided wrong username or password
+                        JOptionPane.showMessageDialog(null, "Wrong key name or password. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                    //Display the secret key
+                    loadedKey.setText(Utils.keyToString(secKey));
+                    //Set the loadedFromStore to true, will be used in decryption
+                    loadedFromStore = true;
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
                 }
-                //Display the secret key
-                loadedKey.setText(Utils.keyToString(secKey));
-                //Set the loadedFromStore to true, will be used in decryption
-                loadedFromStore = true;
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
             }
         });
 

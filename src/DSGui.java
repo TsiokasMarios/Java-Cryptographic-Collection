@@ -82,20 +82,22 @@ public class DSGui extends JPanel implements EventListener {
                     "Select source of randomness", randomSources,
                     "Select key size", keySize,
             };
-            JOptionPane.showConfirmDialog(null, fields, "Load key", JOptionPane.OK_CANCEL_OPTION);
-            try {
-                //Generate the keypair with the keysize and source of randomnes
-                keyPair = DS.generateKeyPair(keySize.getItemAt(keySize.getSelectedIndex()), randomSources.getItemAt(randomSources.getSelectedIndex()));
-                //Get public and private key
-                publicKey = keyPair.getPublic();
-                privateKey = keyPair.getPrivate();
+            int choice = JOptionPane.showConfirmDialog(null, fields, "Load key", JOptionPane.OK_CANCEL_OPTION);
+            if (choice == 0) { //Check if the user pressed ok
+                try {
+                    //Generate the keypair with the keysize and source of randomnes
+                    keyPair = DS.generateKeyPair(keySize.getItemAt(keySize.getSelectedIndex()), randomSources.getItemAt(randomSources.getSelectedIndex()));
+                    //Get public and private key
+                    publicKey = keyPair.getPublic();
+                    privateKey = keyPair.getPrivate();
 
-                //Show the keys in their respective fields
-                privatekeyfield.setText(Utils.keyToString(privateKey));
-                publickeyfield.setText(Utils.keyToString(publicKey));
+                    //Show the keys in their respective fields
+                    privatekeyfield.setText(Utils.keyToString(privateKey));
+                    publickeyfield.setText(Utils.keyToString(publicKey));
 
-            } catch (NoSuchAlgorithmException ex) {
-                throw new RuntimeException(ex);
+                } catch (NoSuchAlgorithmException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         });
 

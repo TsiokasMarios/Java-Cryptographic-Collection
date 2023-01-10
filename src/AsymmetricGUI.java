@@ -88,21 +88,22 @@ public class AsymmetricGUI extends JPanel implements EventListener {
                     "Select source of randomness", randomSources,
                     "Select key size", keySize,
             };
-            //Show the dialo
-            JOptionPane.showConfirmDialog(null, fields, "Configure key", JOptionPane.OK_CANCEL_OPTION);
+            //Show the dialog
+            int choice = JOptionPane.showConfirmDialog(null, fields, "Configure key", JOptionPane.OK_CANCEL_OPTION);
+            if (choice == 0) { //Check if the user pressed ok
+                try {
+                    //Generate the key
+                    keyPair = AsymmetricEnc.generateKeyPair(keySize.getItemAt(keySize.getSelectedIndex()), randomSources.getItemAt(randomSources.getSelectedIndex()));
+                    //Get the public and private keys
+                    publicKey = keyPair.getPublic();
+                    privateKey = keyPair.getPrivate();
+                    //Set the private and public key fields to show the key
+                    privateKeyField.setText(Utils.keyToString(privateKey));
+                    publicKeyField.setText(Utils.keyToString(publicKey));
 
-            try {
-                //Generate the key
-                keyPair = AsymmetricEnc.generateKeyPair(keySize.getItemAt(keySize.getSelectedIndex()), randomSources.getItemAt(randomSources.getSelectedIndex()));
-                //Get the public and private keys
-                publicKey = keyPair.getPublic();
-                privateKey = keyPair.getPrivate();
-                //Set the private and public key fields to show the key
-                privateKeyField.setText(Utils.keyToString(privateKey));
-                publicKeyField.setText(Utils.keyToString(publicKey));
-
-            } catch (NoSuchAlgorithmException ex) {
-                throw new RuntimeException(ex);
+                } catch (NoSuchAlgorithmException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         });
 

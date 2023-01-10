@@ -22,16 +22,18 @@ public class SymmetricEnc {
     }
 
     public static void storeKey(SecretKey keyToStore, String password, String name,String keystoreName) throws Exception{
-
+        File file = new File(keystoreName+".keystore");
         //Create the keystore
         KeyStore javaKeyStore = KeyStore.getInstance("JCEKS");
-        //Store the key in the keystore with the provided name and password
+        if(!file.exists()){
+            javaKeyStore.load(null,null);
+        }
+        //Set the key entry in the keystore
         javaKeyStore.setKeyEntry(name,keyToStore,password.toCharArray(),null);
-        //Save the file
+        //Save the file with the provided name
         OutputStream writeStream = new FileOutputStream(keystoreName+".keystore");
-        //Write the data in the file
+        //Enter the data
         javaKeyStore.store(writeStream, password.toCharArray());
-        //Close the stream
         writeStream.close();
     }
 
